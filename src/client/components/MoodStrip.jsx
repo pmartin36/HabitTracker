@@ -11,12 +11,7 @@ export default function MoodStrip({
   showCalendarButton,
   showingCalendar,
   onToggleCalendar,
-  yesterdayRating,
-  isYesterdayEditable,
-  onYesterdayRatingChange,
 }) {
-  const showYesterday = isYesterdayEditable || yesterdayRating != null;
-
   return (
     <div className={`mood-strip${isEditable ? '' : ' locked'}`}>
       <div className="mood-strip-row">
@@ -43,27 +38,6 @@ export default function MoodStrip({
           </button>
         )}
       </div>
-      {showYesterday && (
-        <div className="mood-strip-yesterday">
-          <span className="mood-label-small">Yesterday</span>
-          <div className="mood-icons mood-icons-small">
-            {ICONS.map((icon, i) => {
-              const rating = ICONS.length - i;
-              return (
-                <button
-                  key={rating}
-                  className={`mood-icon ${yesterdayRating === rating ? 'active' : ''} ${!isYesterdayEditable ? 'locked' : ''}`}
-                  onClick={() => isYesterdayEditable && onYesterdayRatingChange(rating)}
-                  disabled={!isYesterdayEditable}
-                  data-testid={`yesterday-mood-${rating}`}
-                >
-                  {icon}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

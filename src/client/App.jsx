@@ -5,7 +5,7 @@ import MoodStrip from './components/MoodStrip.jsx';
 import MoodCalendar from './components/MoodCalendar.jsx';
 import AddHabitModal from './components/AddHabitModal.jsx';
 import CheckInModal from './components/CheckInModal.jsx';
-import { todayString, addDays } from './utils/date.js';
+import { todayString } from './utils/date.js';
 
 export default function App() {
   const [habits, setHabits] = useState([]);
@@ -18,7 +18,6 @@ export default function App() {
   const [isDesktop] = useState(() => window.innerWidth >= 768);
 
   const today = todayString();
-  const yesterday = addDays(today, -1);
   const currentMonth = today.slice(0, 7);
   const currentYear = parseInt(today.slice(0, 4), 10);
   const currentMonthNum = parseInt(today.slice(5, 7), 10);
@@ -34,20 +33,8 @@ export default function App() {
   };
 
   const fetchMoods = async () => {
-    const todayDay = parseInt(today.slice(8, 10), 10);
-    if (todayDay === 1) {
-      const prevMonthYear = currentMonthNum === 1 ? currentYear - 1 : currentYear;
-      const prevMonthNum = currentMonthNum === 1 ? 12 : currentMonthNum - 1;
-      const prevMonth = `${prevMonthYear}-${String(prevMonthNum).padStart(2, '0')}`;
-      const [moodPrev, moodCurrent] = await Promise.all([
-        fetch(`/api/mood?month=${prevMonth}`).then(r => r.json()),
-        fetch(`/api/mood?month=${currentMonth}`).then(r => r.json()),
-      ]);
-      setMoods([...moodPrev, ...moodCurrent]);
-    } else {
-      const data = await fetch(`/api/mood?month=${currentMonth}`).then(r => r.json());
-      setMoods(data);
-    }
+    const data = await fetch(`/api/mood?month=${currentMonth}`).then(r => r.json());
+    setMoods(data);
   };
 
   const fetchStreaks = async () => {
@@ -94,15 +81,6 @@ export default function App() {
     await fetchMoods();
   };
 
-  const handleYesterdayMoodChange = async (rating) => {
-    await fetch('/api/mood', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: yesterday, rating }),
-    });
-    await fetchMoods();
-  };
-
   const handleEditHabit = async (id, name, emoji) => {
     await fetch(`/api/habits/${id}`, {
       method: 'PATCH',
@@ -132,7 +110,6 @@ export default function App() {
   };
 
   const todayMood = moods.find((m) => m.date === today && m.rating != null);
-  const yesterdayMood = moods.find((m) => m.date === yesterday);
 
   const habitPasses = entries
     .filter((e) => e.status === 'pass')
@@ -151,9 +128,6 @@ export default function App() {
           showCalendarButton={!!todayMood}
           showingCalendar={showMoodCalendar}
           onToggleCalendar={() => setShowMoodCalendar((v) => !v)}
-          yesterdayRating={yesterdayMood?.rating}
-          isYesterdayEditable={!yesterdayMood?.locked}
-          onYesterdayRatingChange={handleYesterdayMoodChange}
         />
       </div>
       {showMoodCalendar && todayMood && (

@@ -71,7 +71,7 @@ input {
 
 /* ===== App shell ===== */
 .app {
-  max-width: 1400px;
+  max-width: 1520px;
   margin: 0 auto;
   padding: 0 24px 48px;
 }
@@ -88,29 +88,6 @@ input {
   justify-content: space-between;
 }
 
-.mood-strip-yesterday {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
-}
-
-.mood-label-small {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-}
-
-.mood-icons-small .mood-icon {
-  width: 26px;
-  height: 26px;
-  font-size: 16px;
-}
 
 .mood-icons {
   display: flex;
@@ -172,6 +149,10 @@ input {
   border-bottom: 1px solid var(--border);
   padding: 12px 24px;
   margin-bottom: 32px;
+  margin-left: -24px;
+  margin-right: -24px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 /* Mood Calendar toggle button */
