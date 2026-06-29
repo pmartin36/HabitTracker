@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-
-const EMOJI_OPTIONS = ['🏃', '💧', '📚', '😴', '🧘', '✍️', '🎯', '💪', '🥗', '🎸'];
+import Picker from '@emoji-mart/react';
+import data from '@emoji-mart/data';
 
 export default function AddHabitModal({ onSubmit, onClose }) {
   const [name, setName] = useState('');
-  const [emoji, setEmoji] = useState('🏃');
+  const [emoji, setEmoji] = useState('🎯');
   const [error, setError] = useState('');
   const inputRef = useRef(null);
 
@@ -33,6 +33,10 @@ export default function AddHabitModal({ onSubmit, onClose }) {
     if (e.target === e.currentTarget) onClose();
   };
 
+  const handleEmojiSelect = (emojiData) => {
+    setEmoji(emojiData.native);
+  };
+
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-box" role="dialog" aria-modal="true" aria-label="Add new habit">
@@ -53,19 +57,18 @@ export default function AddHabitModal({ onSubmit, onClose }) {
             {error && <p className="modal-error">{error}</p>}
           </div>
           <div className="modal-field">
-            <label className="modal-label">Emoji</label>
-            <div className="emoji-grid">
-              {EMOJI_OPTIONS.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  className={`emoji-option${emoji === opt ? ' selected' : ''}`}
-                  onClick={() => setEmoji(opt)}
-                  aria-label={opt}
-                >
-                  {opt}
-                </button>
-              ))}
+            <label className="modal-label">
+              Emoji <span className="selected-emoji">{emoji}</span>
+            </label>
+            <div className="emoji-picker-wrap">
+              <Picker
+                data={data}
+                onEmojiSelect={handleEmojiSelect}
+                theme="dark"
+                previewPosition="none"
+                skinTonePosition="none"
+                perLine={8}
+              />
             </div>
           </div>
           <div className="modal-actions">
