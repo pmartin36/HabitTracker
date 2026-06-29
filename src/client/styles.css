@@ -329,7 +329,8 @@ input {
 .streak-number-wrap {
   position: relative;
   overflow: hidden;
-  height: 1.1em; /* clip the sliding digits */
+  /* height must match the streak-number font-size line — 56px * 1.1 */
+  height: 62px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -727,19 +728,28 @@ a.full-calendar-link {
 }
 
 /* ===== Mood calendar ===== */
+.mood-calendar-panel {
+  max-width: 100%;
+}
+
 .mood-calendar {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
   margin-top: 16px;
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 100%;
+}
+
+.mood-calendar-months {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 16px;
 }
 
 .mood-calendar-month {
-  margin-bottom: 28px;
+  margin-bottom: 0;
 }
 .mood-calendar-month:last-child {
   margin-bottom: 0;
@@ -1033,6 +1043,10 @@ em-emoji-picker {
 
 /* ===== Responsive overrides (≤767px) ===== */
 @media (max-width: 767px) {
+  .mood-calendar-months {
+    grid-template-columns: 1fr;
+  }
+
   .app {
     padding: 0 16px 32px;
   }

@@ -43,33 +43,35 @@ export default function MoodCalendar({ moods, habitPasses, initialYear, initialM
         <button onClick={() => navigate(-3)}>Previous</button>
         <button onClick={() => navigate(3)}>Next</button>
       </div>
-      {months.map(({ year: y, month: m }) => {
-        const days = buildMoodDays(y, m);
-        return (
-          <div key={`${y}-${m}`} className="mood-calendar-month">
-            <div className="mood-calendar-month-heading">
-              {MONTH_NAMES[m - 1]} {y}
+      <div className="mood-calendar-months">
+        {months.map(({ year: y, month: m }) => {
+          const days = buildMoodDays(y, m);
+          return (
+            <div key={`${y}-${m}`} className="mood-calendar-month">
+              <div className="mood-calendar-month-heading">
+                {MONTH_NAMES[m - 1]} {y}
+              </div>
+              <div className="calendar-grid">
+                {days.map(dateStr => {
+                  const rating = moodMap[dateStr];
+                  const emojis = passMap[dateStr] || [];
+                  return (
+                    <div
+                      key={dateStr}
+                      data-testid={`mood-day-${dateStr}`}
+                      className={rating != null ? `mood-${rating}` : 'mood-none'}
+                    >
+                      {emojis.map((emoji, idx) => (
+                        <span key={idx}>{emoji}</span>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="calendar-grid">
-              {days.map(dateStr => {
-                const rating = moodMap[dateStr];
-                const emojis = passMap[dateStr] || [];
-                return (
-                  <div
-                    key={dateStr}
-                    data-testid={`mood-day-${dateStr}`}
-                    className={rating != null ? `mood-${rating}` : 'mood-none'}
-                  >
-                    {emojis.map((emoji, idx) => (
-                      <span key={idx}>{emoji}</span>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
