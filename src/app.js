@@ -3,6 +3,7 @@ import db from './db/index.js';
 import habitsRouter from './routes/habits.js';
 import entriesRouter from './routes/entries.js';
 import moodRouter from './routes/mood.js';
+import streaksRouter from './routes/streaks.js';
 
 /**
  * Creates an Express app, optionally injecting a database instance.
@@ -24,6 +25,7 @@ export function createApp(injectedDb) {
   app.use('/api/habits', habitsRouter(database));
   app.use('/api/entries', entriesRouter(database));
   app.use('/api/mood', moodRouter(database));
+  app.use('/api/streaks', streaksRouter(database));
 
   return app;
 }

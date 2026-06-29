@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { todayString } from '../utils/date.js';
 import HabitActions from './HabitActions.jsx';
+import MiniCalendar from './MiniCalendar.jsx';
 
-export default function MobileHabitView({ habits, entries, onStatusChange, onAddHabit }) {
+export default function MobileHabitView({ habits, entries, onStatusChange, onAddHabit, streaks = {} }) {
   const [index, setIndex] = useState(0);
   const today = todayString();
+  const currentYear = parseInt(today.slice(0, 4), 10);
+  const currentMonth = parseInt(today.slice(5, 7), 10);
 
   if (habits.length === 0) {
     return (
@@ -23,6 +26,10 @@ export default function MobileHabitView({ habits, entries, onStatusChange, onAdd
   const isFirst = index === 0;
   const isLast = index === habits.length - 1;
 
+  const habitEntries = entries.filter(e => e.habit_id === habit.id);
+  const todayEntry = habitEntries.find(e => e.date === today);
+  const currentStatus = todayEntry?.status;
+
   return (
     <div className="mobile-habit-view">
       <div className="habit-card">
@@ -30,7 +37,25 @@ export default function MobileHabitView({ habits, entries, onStatusChange, onAdd
           {habit.emoji && <span className="habit-emoji">{habit.emoji} </span>}
           {habit.name}
         </span>
-        <HabitActions habitId={habit.id} date={today} onStatusChange={onStatusChange} />
+        <HabitActions
+          habitId={habit.id}
+          date={today}
+          onStatusChange={onStatusChange}
+          currentStatus={currentStatus}
+        />
+        <div className="streak">
+          <span className="streak-number">{streaks[habit.id] ?? 0}</span>
+          <span className="streak-label">day streak</span>
+        </div>
+        <div data-testid={`mini-calendar-${habit.id}`}>
+          <MiniCalendar
+            habitId={habit.id}
+            entries={habitEntries}
+            onStatusChange={(date, status) => onStatusChange(habit.id, date, status)}
+            year={currentYear}
+            month={currentMonth}
+          />
+        </div>
       </div>
       <div className="indicator-dots">
         {habits.map((h, i) => (

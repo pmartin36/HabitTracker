@@ -10,12 +10,15 @@ export default function App() {
   const [habits, setHabits] = useState([]);
   const [entries, setEntries] = useState([]);
   const [moods, setMoods] = useState([]);
+  const [streaks, setStreaks] = useState({});
   const [showMoodCalendar, setShowMoodCalendar] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [isDesktop] = useState(() => window.innerWidth >= 768);
 
   const today = todayString();
   const currentMonth = today.slice(0, 7);
+  const currentYear = parseInt(today.slice(0, 4), 10);
+  const currentMonthNum = parseInt(today.slice(5, 7), 10);
 
   const fetchHabits = async () => {
     const data = await fetch('/api/habits').then(r => r.json());
@@ -32,16 +35,23 @@ export default function App() {
     setMoods(data);
   };
 
+  const fetchStreaks = async () => {
+    const data = await fetch('/api/streaks').then(r => r.json());
+    setStreaks(data);
+  };
+
   useEffect(() => {
     const init = async () => {
-      const [habitsData, moodData, entriesData] = await Promise.all([
+      const [habitsData, moodData, entriesData, streaksData] = await Promise.all([
         fetch('/api/habits').then(r => r.json()),
         fetch(`/api/mood?month=${currentMonth}`).then(r => r.json()),
         fetch(`/api/entries?month=${currentMonth}`).then(r => r.json()),
+        fetch('/api/streaks').then(r => r.json()),
       ]);
       setHabits(habitsData);
       setMoods(moodData);
       setEntries(entriesData);
+      setStreaks(streaksData);
     };
     init();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -53,6 +63,7 @@ export default function App() {
       body: JSON.stringify({ habit_id: habitId, date, status }),
     });
     await fetchEntries();
+    await fetchStreaks();
   };
 
   const handleMoodChange = async (rating) => {
@@ -87,23 +98,27 @@ export default function App() {
 
   return (
     <div className="app">
-      <MoodStrip
-        currentRating={todayMood?.rating}
-        isEditable={!todayMood?.locked}
-        onRatingChange={handleMoodChange}
-      />
-      {todayMood && (
-        <button onClick={() => setShowMoodCalendar((v) => !v)}>
-          Mood Calendar
-        </button>
-      )}
-      {showMoodCalendar && <MoodCalendar moods={moods} habitPasses={habitPasses} />}
+      <div className="mood-strip-container">
+        <MoodStrip
+          currentRating={todayMood?.rating}
+          isEditable={!todayMood?.locked}
+          onRatingChange={handleMoodChange}
+        />
+        {todayMood && (
+          <button className="mood-cal-toggle" onClick={() => setShowMoodCalendar((v) => !v)}>
+            {showMoodCalendar ? 'Hide Mood Calendar' : 'Mood Calendar'}
+          </button>
+        )}
+      </div>
       {isDesktop ? (
         <HabitBoard
           habits={habits}
           entries={entries}
           onStatusChange={handleStatusChange}
           onAddHabit={onAddHabit}
+          streaks={streaks}
+          currentYear={currentYear}
+          currentMonth={currentMonthNum}
         />
       ) : (
         <MobileHabitView
@@ -111,7 +126,20 @@ export default function App() {
           entries={entries}
           onStatusChange={handleStatusChange}
           onAddHabit={onAddHabit}
+          streaks={streaks}
+          currentYear={currentYear}
+          currentMonth={currentMonthNum}
         />
+      )}
+      {showMoodCalendar && (
+        <div className="mood-calendar-section">
+          <MoodCalendar
+            moods={moods}
+            habitPasses={habitPasses}
+            initialYear={currentYear}
+            initialMonth={currentMonthNum}
+          />
+        </div>
       )}
       {showAddModal && (
         <AddHabitModal
