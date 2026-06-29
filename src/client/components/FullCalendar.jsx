@@ -1,28 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { buildDays } from '../utils/calendar.js';
 import { nextStatus } from '../utils/status.js';
-
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
+import { MONTH_NAMES } from '../utils/date.js';
+import { useMonthNav } from '../utils/useMonthNav.js';
 
 export default function FullCalendar({ habitId, entries, onStatusChange, initialYear, initialMonth }) {
-  const [{ year, month }, setYearMonth] = useState({ year: initialYear, month: initialMonth });
-
+  const { year, month, goToPrev, goToNext } = useMonthNav(initialYear, initialMonth);
   const days = buildDays(entries, year, month);
-
-  function goToPrev() {
-    setYearMonth(({ year: y, month: m }) =>
-      m === 1 ? { year: y - 1, month: 12 } : { year: y, month: m - 1 }
-    );
-  }
-
-  function goToNext() {
-    setYearMonth(({ year: y, month: m }) =>
-      m === 12 ? { year: y + 1, month: 1 } : { year: y, month: m + 1 }
-    );
-  }
 
   return (
     <div className="full-calendar">

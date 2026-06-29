@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { localToday, addDays } from '../utils/date.js';
 
 export default function moodRouter(db) {
   const router = Router();
@@ -14,7 +15,7 @@ export default function moodRouter(db) {
   const upsertMood = db.prepare(
     `INSERT INTO daily_mood (date, rating, locked)
      VALUES (?, ?, 0)
-     ON CONFLICT(date) DO UPDATE SET rating = excluded.rating, locked = 0`
+     ON CONFLICT(date) DO UPDATE SET rating = excluded.rating`
   );
 
   router.get('/', (req, res) => {
@@ -31,13 +32,8 @@ export default function moodRouter(db) {
       return res.status(400).json({ error: 'rating must be an integer between 1 and 5' });
     }
 
-    // Compute today and yesterday using UTC (toISOString) so tests and
-    // implementation agree when running in the same environment.
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
-    const yesterdayDate = new Date(now);
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-    const yesterday = yesterdayDate.toISOString().split('T')[0];
+    const today = localToday();
+    const yesterday = addDays(today, -1);
 
     // Check grace window: only today or yesterday are editable
     if (date !== today && date !== yesterday) {

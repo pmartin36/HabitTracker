@@ -9,6 +9,10 @@ export function addDays(dateStr, n) {
   ].join('-');
 }
 
+export function localToday() {
+  return toDateString(new Date());
+}
+
 export function toDateString(d) {
   if (d instanceof Date) {
     return [

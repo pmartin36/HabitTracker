@@ -1,3 +1,8 @@
+export const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
 export function todayString() {
   const d = new Date();
   return formatDate(d.getFullYear(), d.getMonth() + 1, d.getDate());

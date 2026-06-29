@@ -19,15 +19,14 @@ function createApp(db) {
   return app;
 }
 
-/**
- * Returns a YYYY-MM-DD string for today + offsetDays.
- * Uses toISOString (UTC) so both test and implementation agree when they
- * use the same approach.
- */
 function dateOffset(days) {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-');
 }
 
 describe("Mood API", () => {
