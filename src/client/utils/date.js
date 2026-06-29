@@ -1,5 +1,6 @@
 export function todayString() {
-  return new Date().toISOString().split('T')[0];
+  const d = new Date();
+  return formatDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
 }
 
 export function formatDate(year, month, day) {

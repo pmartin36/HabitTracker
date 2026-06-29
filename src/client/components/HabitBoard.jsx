@@ -1,8 +1,6 @@
 import React from 'react';
-
-function todayString() {
-  return new Date().toISOString().split('T')[0];
-}
+import { todayString } from '../utils/date.js';
+import HabitActions from './HabitActions.jsx';
 
 export default function HabitBoard({ habits, entries, onStatusChange, onAddHabit }) {
   const today = todayString();
@@ -16,11 +14,7 @@ export default function HabitBoard({ habits, entries, onStatusChange, onAddHabit
           className="habit-card"
         >
           <span className="habit-name">{habit.name}</span>
-          <div className="habit-actions">
-            <button onClick={() => onStatusChange(habit.id, today, 'pass')}>Done!</button>
-            <button onClick={() => onStatusChange(habit.id, today, 'skip')}>Skip</button>
-            <button onClick={() => onStatusChange(habit.id, today, 'fail')}>Fail</button>
-          </div>
+          <HabitActions habitId={habit.id} date={today} onStatusChange={onStatusChange} />
         </div>
       ))}
       {habits.length < 5 && (

@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-
-function todayString() {
-  return new Date().toISOString().split('T')[0];
-}
+import { todayString } from '../utils/date.js';
+import HabitActions from './HabitActions.jsx';
 
 export default function MobileHabitView({ habits, entries, onStatusChange }) {
   const [index, setIndex] = useState(0);
@@ -24,11 +22,7 @@ export default function MobileHabitView({ habits, entries, onStatusChange }) {
     <div className="mobile-habit-view">
       <div className="habit-card">
         <span className="habit-name">{habit.name}</span>
-        <div className="habit-actions">
-          <button onClick={() => onStatusChange(habit.id, today, 'pass')}>Done!</button>
-          <button onClick={() => onStatusChange(habit.id, today, 'skip')}>Skip</button>
-          <button onClick={() => onStatusChange(habit.id, today, 'fail')}>Fail</button>
-        </div>
+        <HabitActions habitId={habit.id} date={today} onStatusChange={onStatusChange} />
       </div>
       <div className="indicator-dots">
         {habits.map((h, i) => (
@@ -40,20 +34,8 @@ export default function MobileHabitView({ habits, entries, onStatusChange }) {
         ))}
       </div>
       <div className="navigation">
-        <button
-          onClick={() => setIndex(i => i - 1)}
-          disabled={isFirst}
-          aria-disabled={isFirst ? 'true' : 'false'}
-        >
-          Previous
-        </button>
-        <button
-          onClick={() => setIndex(i => i + 1)}
-          disabled={isLast}
-          aria-disabled={isLast ? 'true' : 'false'}
-        >
-          Next
-        </button>
+        <button onClick={() => setIndex(i => i - 1)} disabled={isFirst}>Previous</button>
+        <button onClick={() => setIndex(i => i + 1)} disabled={isLast}>Next</button>
       </div>
     </div>
   );
