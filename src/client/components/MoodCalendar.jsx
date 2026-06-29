@@ -15,6 +15,24 @@ function buildMoodDays(year, month) {
   return days;
 }
 
+function MoodDayCell({ day, entry, passes, ...rest }) {
+  const topRow = passes.slice(0, 3);
+  const bottomRow = passes.slice(3, 5);
+  return (
+    <div className={`mood-day mood-${entry?.rating ?? 'none'}`} {...rest}>
+      <div className="mood-day-emojis">
+        {topRow.length > 0 && (
+          <div className="mood-emoji-row">{topRow.map((p, i) => <span key={i}>{p.emoji}</span>)}</div>
+        )}
+        {bottomRow.length > 0 && (
+          <div className="mood-emoji-row">{bottomRow.map((p, i) => <span key={i}>{p.emoji}</span>)}</div>
+        )}
+      </div>
+      <span className="mood-day-num">{day}</span>
+    </div>
+  );
+}
+
 export default function MoodCalendar({ moods, habitPasses, initialYear, initialMonth }) {
   const [{ year, month }, setYearMonth] = useState({ year: initialYear, month: initialMonth });
 
@@ -28,11 +46,6 @@ export default function MoodCalendar({ moods, habitPasses, initialYear, initialM
   const moodMap = Object.fromEntries(
     (moods || []).filter(m => m.rating != null).map(m => [m.date, m.rating])
   );
-
-  const passMap = (habitPasses || []).reduce((acc, { date, emoji }) => {
-    (acc[date] ??= []).push(emoji);
-    return acc;
-  }, {});
 
   // 3 months: oldest on left, most recent on right
   const months = [-2, -1, 0].map(offset => offsetMonth(year, month, offset));
@@ -54,17 +67,17 @@ export default function MoodCalendar({ moods, habitPasses, initialYear, initialM
               <div className="calendar-grid">
                 {days.map(dateStr => {
                   const rating = moodMap[dateStr];
-                  const emojis = passMap[dateStr] || [];
+                  const entry = rating != null ? { rating } : undefined;
+                  const passes = (habitPasses || []).filter(p => p.date === dateStr);
+                  const day = parseInt(dateStr.split('-')[2], 10);
                   return (
-                    <div
+                    <MoodDayCell
                       key={dateStr}
+                      day={day}
+                      entry={entry}
+                      passes={passes}
                       data-testid={`mood-day-${dateStr}`}
-                      className={rating != null ? `mood-${rating}` : 'mood-none'}
-                    >
-                      {emojis.map((emoji, idx) => (
-                        <span key={idx}>{emoji}</span>
-                      ))}
-                    </div>
+                    />
                   );
                 })}
               </div>

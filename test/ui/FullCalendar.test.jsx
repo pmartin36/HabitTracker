@@ -42,11 +42,11 @@ describe('FullCalendar', () => {
     expect(screen.getByText(/March\s+2024/)).toBeInTheDocument();
   });
 
-  it('most recent month is rendered first (appears before earlier months)', () => {
+  it('most recent month is rendered last (oldest at top, newest at bottom)', () => {
     renderCalendar({ initialYear: 2024, initialMonth: 3, createdAt: '2024-01-01' });
     const headings = screen.getAllByText(/\b(January|February|March)\s+2024/);
-    expect(headings[0].textContent).toMatch(/March/);
-    expect(headings[headings.length - 1].textContent).toMatch(/January/);
+    expect(headings[0].textContent).toMatch(/January/);
+    expect(headings[headings.length - 1].textContent).toMatch(/March/);
   });
 
   it('does not render a "Previous" navigation button', () => {

@@ -26,7 +26,7 @@ function generateMonths(createdAt, initialYear, initialMonth) {
 }
 
 export default function FullCalendar({ entries, onStatusChange, initialYear, initialMonth, createdAt }) {
-  const months = generateMonths(createdAt, initialYear, initialMonth);
+  const months = generateMonths(createdAt, initialYear, initialMonth).reverse();
   const entryMap = Object.fromEntries(entries.map(e => [e.date, e.status]));
 
   return (
