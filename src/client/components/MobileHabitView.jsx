@@ -4,6 +4,7 @@ import HabitActions from './HabitActions.jsx';
 import MiniCalendar from './MiniCalendar.jsx';
 import AnimatedStreak from './AnimatedStreak.jsx';
 import EditHabitModal from './EditHabitModal.jsx';
+import CalendarModal from './CalendarModal.jsx';
 
 export default function MobileHabitView({
   habits,
@@ -16,6 +17,7 @@ export default function MobileHabitView({
 }) {
   const [index, setIndex] = useState(0);
   const [editingHabit, setEditingHabit] = useState(null);
+  const [calendarHabit, setCalendarHabit] = useState(null);
   const today = todayString();
   const currentYear = parseInt(today.slice(0, 4), 10);
   const currentMonth = parseInt(today.slice(5, 7), 10);
@@ -71,6 +73,9 @@ export default function MobileHabitView({
             month={currentMonth}
           />
         </div>
+        <button className="full-cal-link" onClick={() => setCalendarHabit(habit)}>
+          Full Calendar →
+        </button>
       </div>
       <div className="indicator-dots">
         {habits.map((h, i) => (
@@ -116,6 +121,16 @@ export default function MobileHabitView({
             setEditingHabit(null);
           }}
           onClose={() => setEditingHabit(null)}
+        />
+      )}
+      {calendarHabit && (
+        <CalendarModal
+          habit={calendarHabit}
+          entries={entries}
+          onStatusChange={(habitId, date, status) => onStatusChange(habitId, date, status)}
+          onClose={() => setCalendarHabit(null)}
+          currentYear={currentYear}
+          currentMonth={currentMonth}
         />
       )}
     </div>

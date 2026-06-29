@@ -21,7 +21,14 @@ function renderCalendar({
 }
 
 describe('MoodCalendar', () => {
-  it('renders a month heading showing "January 2024"', () => {
+  it('renders 3 month headings', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 3 });
+    expect(screen.getByText(/March\s+2024/)).toBeInTheDocument();
+    expect(screen.getByText(/February\s+2024/)).toBeInTheDocument();
+    expect(screen.getByText(/January\s+2024/)).toBeInTheDocument();
+  });
+
+  it('renders a month heading showing "January 2024" when that is the most recent month', () => {
     renderCalendar({ initialYear: 2024, initialMonth: 1 });
     expect(screen.getByText(/January\s+2024/)).toBeInTheDocument();
   });
@@ -87,17 +94,20 @@ describe('MoodCalendar', () => {
     // Reaching here means the click was silently ignored — read-only contract holds
   });
 
-  it('clicking Next navigates to the next month', async () => {
+  it('clicking Next advances by 3 months', async () => {
     const user = userEvent.setup();
+    // Most recent = Jan 2024; after Next the most recent becomes April 2024
+    // The view shows Feb, Mar, Apr 2024 — Feb was not visible before
     renderCalendar({ initialYear: 2024, initialMonth: 1 });
     await user.click(screen.getByRole('button', { name: /next/i }));
-    expect(screen.getByText(/February\s+2024/)).toBeInTheDocument();
+    expect(screen.getByText(/April\s+2024/)).toBeInTheDocument();
   });
 
-  it('clicking Previous navigates to the previous month', async () => {
+  it('clicking Previous goes back 3 months', async () => {
     const user = userEvent.setup();
+    // Most recent = March 2024; after Previous the most recent becomes December 2023
     renderCalendar({ initialYear: 2024, initialMonth: 3 });
     await user.click(screen.getByRole('button', { name: /previous/i }));
-    expect(screen.getByText(/February\s+2024/)).toBeInTheDocument();
+    expect(screen.getByText(/December\s+2023/)).toBeInTheDocument();
   });
 });

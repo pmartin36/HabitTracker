@@ -189,8 +189,10 @@ input {
   flex-direction: row;
   align-items: flex-start;
   gap: 16px;
+  padding-top: 4px;
   padding-bottom: 16px;
   overflow-x: auto;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -734,6 +736,23 @@ a.full-calendar-link {
   max-width: 480px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.mood-calendar-month {
+  margin-bottom: 28px;
+}
+.mood-calendar-month:last-child {
+  margin-bottom: 0;
+}
+.mood-calendar-month-heading {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
 }
 
 .mood-calendar .calendar-grid {
