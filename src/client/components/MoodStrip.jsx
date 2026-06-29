@@ -11,6 +11,7 @@ export default function MoodStrip({
   showCalendarButton,
   showingCalendar,
   onToggleCalendar,
+  recentMoods,
 }) {
   return (
     <div className={`mood-strip${isEditable ? '' : ' locked'}`}>
@@ -32,11 +33,24 @@ export default function MoodStrip({
             );
           })}
         </div>
-        {showCalendarButton && (
-          <button className="mood-calendar-toggle" onClick={onToggleCalendar}>
-            {showingCalendar ? 'Hide Mood Calendar' : 'Mood Calendar'}
-          </button>
-        )}
+        <div className="mood-strip-right">
+          {recentMoods && recentMoods.length > 0 && (
+            <div className="mood-recent-days">
+              {recentMoods.map((m, i) => (
+                <div
+                  key={i}
+                  className={`mood-recent-day ${m ? `mood-${m.rating}` : 'mood-none'}`}
+                  title={m ? m.date : ''}
+                />
+              ))}
+            </div>
+          )}
+          {showCalendarButton && (
+            <button className="mood-calendar-toggle" onClick={onToggleCalendar}>
+              {showingCalendar ? 'Hide Mood Calendar' : 'Mood Calendar'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

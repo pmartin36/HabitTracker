@@ -155,6 +155,28 @@ input {
   padding-right: 24px;
 }
 
+.mood-strip-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.mood-recent-days {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.mood-recent-day {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Uses existing mood-1 through mood-5 and mood-none color classes */
+
 /* Mood Calendar toggle button */
 .mood-calendar-toggle {
   font-size: 13px;

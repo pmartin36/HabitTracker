@@ -109,6 +109,14 @@ export default function App() {
     setShowAddModal(false);
   };
 
+  const recentMoods = Array.from({ length: 5 }, (_, i) => {
+    // i=0 is 4 days ago, i=4 is today
+    const d = new Date(today + 'T12:00:00');
+    d.setDate(d.getDate() - (4 - i));
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return moods.find(m => m.date === dateStr) ?? null;
+  });
+
   const todayMood = moods.find((m) => m.date === today && m.rating != null);
 
   const habitPasses = entries
@@ -128,6 +136,7 @@ export default function App() {
           showCalendarButton={!!todayMood}
           showingCalendar={showMoodCalendar}
           onToggleCalendar={() => setShowMoodCalendar((v) => !v)}
+          recentMoods={recentMoods}
         />
       </div>
       {showMoodCalendar && todayMood && (
