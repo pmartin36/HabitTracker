@@ -1,26 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 export default function AnimatedStreak({ value }) {
-  const [displayValue, setDisplayValue] = useState(value);
-  const [animClass, setAnimClass] = useState('');
-  const prevValue = useRef(value);
+  const [anim, setAnim] = useState({ from: value, to: value, running: false, dir: 'up' });
+  const prev = useRef(value);
 
   useEffect(() => {
-    if (value === prevValue.current) return;
-    const increasing = value > prevValue.current;
-    setAnimClass(increasing ? 'streak-roll-up' : 'streak-roll-down');
-    const t = setTimeout(() => {
-      setDisplayValue(value);
-      setAnimClass('');
-    }, 300);
-    prevValue.current = value;
+    if (value === prev.current) return;
+    const dir = value > prev.current ? 'up' : 'down';
+    setAnim({ from: prev.current, to: value, running: true, dir });
+    prev.current = value;
+    const t = setTimeout(() => setAnim(a => ({ ...a, running: false })), 400);
     return () => clearTimeout(t);
   }, [value]);
 
   return (
     <div className="streak">
-      <div className={`streak-number-wrap ${animClass}`}>
-        <span className="streak-number">{displayValue}</span>
+      <div className="streak-number-wrap">
+        {anim.running ? (
+          <>
+            <span className={`streak-number sn-exit-${anim.dir}`}>{anim.from}</span>
+            <span className={`streak-number sn-enter-${anim.dir}`}>{anim.to}</span>
+          </>
+        ) : (
+          <span className="streak-number">{value}</span>
+        )}
       </div>
       <span className="streak-label">day streak</span>
     </div>

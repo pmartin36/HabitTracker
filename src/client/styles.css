@@ -325,22 +325,38 @@ input {
 }
 
 .streak-number-wrap {
+  position: relative;
   overflow: hidden;
-  line-height: 1;
+  height: 1.1em; /* clip the sliding digits */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@keyframes roll-up {
-  0%   { transform: translateY(100%); opacity: 0; }
-  100% { transform: translateY(0);    opacity: 1; }
+/* Incrementing (up): old exits upward, new enters from below */
+@keyframes sn-exit-up {
+  from { transform: translateY(0);     opacity: 1; }
+  to   { transform: translateY(-110%); opacity: 0; }
+}
+@keyframes sn-enter-up {
+  from { transform: translateY(110%);  opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
 }
 
-@keyframes roll-down {
-  0%   { transform: translateY(-100%); opacity: 0; }
-  100% { transform: translateY(0);     opacity: 1; }
+/* Decrementing (down): old exits downward, new enters from above */
+@keyframes sn-exit-down {
+  from { transform: translateY(0);     opacity: 1; }
+  to   { transform: translateY(110%);  opacity: 0; }
+}
+@keyframes sn-enter-down {
+  from { transform: translateY(-110%); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
 }
 
-.streak-roll-up .streak-number   { animation: roll-up   0.3s cubic-bezier(0.22,1,0.36,1); }
-.streak-roll-down .streak-number { animation: roll-down 0.2s cubic-bezier(0.22,1,0.36,1); }
+.streak-number.sn-exit-up    { position: absolute; animation: sn-exit-up   0.35s cubic-bezier(0.4,0,1,1) forwards; }
+.streak-number.sn-enter-up   {                     animation: sn-enter-up  0.35s cubic-bezier(0,0,0.2,1) forwards; }
+.streak-number.sn-exit-down  { position: absolute; animation: sn-exit-down 0.2s  cubic-bezier(0.4,0,1,1) forwards; }
+.streak-number.sn-enter-down {                     animation: sn-enter-down 0.2s cubic-bezier(0,0,0.2,1) forwards; }
 
 .streak-number {
   font-size: 56px;
