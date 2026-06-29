@@ -10,7 +10,7 @@ export function runMigrations(db) {
 
     CREATE TABLE IF NOT EXISTS entries (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      habit_id   INTEGER NOT NULL REFERENCES habits(id),
+      habit_id   INTEGER NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
       date       TEXT    NOT NULL,
       status     TEXT    NOT NULL DEFAULT 'pending'
                          CHECK (status IN ('pass', 'skip', 'fail', 'pending')),

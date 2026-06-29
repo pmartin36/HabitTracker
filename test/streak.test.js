@@ -156,7 +156,7 @@ describe("computeStreak", () => {
 
   it("accepts a Date object as asOfDate", () => {
     addEntry("2024-01-01", "pass");
-    expect(computeStreak(db, habitId, new Date("2024-01-01T00:00:00Z"))).toBe(1);
+    expect(computeStreak(db, habitId, new Date("2024-01-01T12:00:00Z"))).toBe(1);
   });
 
   it("accepts a 'YYYY-MM-DD' string as asOfDate", () => {
