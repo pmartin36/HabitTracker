@@ -59,6 +59,13 @@ export default function App() {
 
   const todayMood = moods.find((m) => m.date === today && m.rating != null);
 
+  const habitPasses = entries
+    .filter((e) => e.status === 'pass')
+    .map((e) => {
+      const habit = habits.find((h) => h.id === e.habit_id);
+      return { date: e.date, emoji: habit?.emoji };
+    });
+
   return (
     <div className="app">
       <MoodStrip
@@ -71,7 +78,7 @@ export default function App() {
           Mood Calendar
         </button>
       )}
-      {showMoodCalendar && <MoodCalendar moods={moods} />}
+      {showMoodCalendar && <MoodCalendar moods={moods} habitPasses={habitPasses} />}
       {isDesktop ? (
         <HabitBoard
           habits={habits}

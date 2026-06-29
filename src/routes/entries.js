@@ -18,6 +18,7 @@ export default function entriesRouter(db) {
   `);
   const getEntry        = db.prepare('SELECT * FROM entries WHERE habit_id = ? AND date = ?');
   const getByMonth      = db.prepare("SELECT * FROM entries WHERE habit_id = ? AND date LIKE ?");
+  const getAllByMonth    = db.prepare("SELECT * FROM entries WHERE date LIKE ? ORDER BY date");
 
   router.post('/', (req, res) => {
     const { habit_id, date, status } = req.body ?? {};
@@ -35,6 +36,11 @@ export default function entriesRouter(db) {
     const streak = computeStreak(db, habit_id, new Date());
 
     res.json({ entry, streak });
+  });
+
+  router.get('/', (req, res) => {
+    const { month } = req.query;
+    res.json(getAllByMonth.all(`${month}-%`));
   });
 
   router.get('/:habit_id', (req, res) => {

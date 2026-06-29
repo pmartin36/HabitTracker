@@ -160,6 +160,36 @@ describe("Entries API", () => {
     );
   });
 
+  // ── GET /api/entries?month=YYYY-MM (all habits) ──────────────────────────────
+
+  describe("GET /api/entries?month=YYYY-MM (all habits)", () => {
+    it("returns all entries for that month across all habits", async () => {
+      db.prepare(
+        "INSERT INTO habits (name, emoji, sort_order, created_at) VALUES (?, ?, ?, ?)"
+      ).run("Other Habit", "🔲", 2, "2020-01-01");
+      const otherId = db
+        .prepare("SELECT id FROM habits WHERE name = 'Other Habit'")
+        .get().id;
+
+      db.prepare(
+        "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+      ).run(habitId, "2024-03-05", "pass", 1);
+      db.prepare(
+        "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+      ).run(otherId, "2024-03-10", "skip", 1);
+
+      const res = await request(app).get("/api/entries?month=2024-03");
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(2);
+    });
+
+    it("returns empty array when no entries exist for that month", async () => {
+      const res = await request(app).get("/api/entries?month=2024-06");
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([]);
+    });
+  });
+
   // ── GET /api/entries/:habit_id ────────────────────────────────────────────────
 
   describe("GET /api/entries/:habit_id?month=YYYY-MM", () => {
