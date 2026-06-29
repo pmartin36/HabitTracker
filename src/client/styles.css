@@ -79,8 +79,37 @@ input {
 /* ===== Mood strip ===== */
 .mood-strip {
   display: flex;
+  flex-direction: column;
+}
+
+.mood-strip-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.mood-strip-yesterday {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.mood-label-small {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.mood-icons-small .mood-icon {
+  width: 26px;
+  height: 26px;
+  font-size: 16px;
 }
 
 .mood-icons {

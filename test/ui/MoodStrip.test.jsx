@@ -18,6 +18,26 @@ function renderStrip({
   );
 }
 
+function renderStripWithYesterday({
+  currentRating = null,
+  isEditable = true,
+  onRatingChange = vi.fn(),
+  yesterdayRating = undefined,
+  isYesterdayEditable = true,
+  onYesterdayRatingChange = vi.fn(),
+} = {}) {
+  return render(
+    <MoodStrip
+      currentRating={currentRating}
+      isEditable={isEditable}
+      onRatingChange={onRatingChange}
+      yesterdayRating={yesterdayRating}
+      isYesterdayEditable={isYesterdayEditable}
+      onYesterdayRatingChange={onYesterdayRatingChange}
+    />
+  );
+}
+
 describe('MoodStrip', () => {
   it('renders 5 mood icons', () => {
     renderStrip();
@@ -69,5 +89,66 @@ describe('MoodStrip', () => {
     const anyIconLocked = icons.some((icon) => icon.classList.contains('locked'));
     const stripLocked = container.firstChild?.classList.contains('locked');
     expect(anyIconLocked || stripLocked).toBe(true);
+  });
+
+  // ── Yesterday row ────────────────────────────────────────────────────────
+
+  it('yesterday row is NOT rendered when neither yesterdayRating nor isYesterdayEditable is provided', () => {
+    renderStrip();
+    expect(screen.queryByTestId('yesterday-mood-1')).not.toBeInTheDocument();
+  });
+
+  it('yesterday row renders 5 icons when isYesterdayEditable=true', () => {
+    renderStripWithYesterday({ isYesterdayEditable: true });
+    for (let i = 1; i <= 5; i++) {
+      expect(screen.getByTestId(`yesterday-mood-${i}`)).toBeInTheDocument();
+    }
+  });
+
+  it('yesterday row renders when yesterdayRating is set even if isYesterdayEditable=false', () => {
+    renderStripWithYesterday({ yesterdayRating: 3, isYesterdayEditable: false });
+    expect(screen.getByTestId('yesterday-mood-3')).toBeInTheDocument();
+  });
+
+  it('when yesterdayRating=2, yesterday icon 2 has class active and others do not', () => {
+    renderStripWithYesterday({ yesterdayRating: 2, isYesterdayEditable: true });
+    expect(screen.getByTestId('yesterday-mood-2')).toHaveClass('active');
+    [1, 3, 4, 5].forEach((n) => {
+      expect(screen.getByTestId(`yesterday-mood-${n}`)).not.toHaveClass('active');
+    });
+  });
+
+  it('clicking a yesterday icon calls onYesterdayRatingChange with its rating when isYesterdayEditable=true', async () => {
+    const user = userEvent.setup();
+    const onYesterdayRatingChange = vi.fn();
+    renderStripWithYesterday({ isYesterdayEditable: true, onYesterdayRatingChange });
+    await user.click(screen.getByTestId('yesterday-mood-4'));
+    expect(onYesterdayRatingChange).toHaveBeenCalledWith(4);
+  });
+
+  it('clicking a yesterday icon does NOT call onYesterdayRatingChange when isYesterdayEditable=false', async () => {
+    const user = userEvent.setup();
+    const onYesterdayRatingChange = vi.fn();
+    renderStripWithYesterday({
+      yesterdayRating: 3,
+      isYesterdayEditable: false,
+      onYesterdayRatingChange,
+    });
+    await user.click(screen.getByTestId('yesterday-mood-3'));
+    expect(onYesterdayRatingChange).not.toHaveBeenCalled();
+  });
+
+  it('yesterday icons are disabled when isYesterdayEditable=false', () => {
+    renderStripWithYesterday({ yesterdayRating: 3, isYesterdayEditable: false });
+    for (let i = 1; i <= 5; i++) {
+      expect(screen.getByTestId(`yesterday-mood-${i}`)).toBeDisabled();
+    }
+  });
+
+  it('yesterday icons have class locked when isYesterdayEditable=false', () => {
+    renderStripWithYesterday({ yesterdayRating: 3, isYesterdayEditable: false });
+    for (let i = 1; i <= 5; i++) {
+      expect(screen.getByTestId(`yesterday-mood-${i}`)).toHaveClass('locked');
+    }
   });
 });

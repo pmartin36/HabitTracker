@@ -17,3 +17,9 @@ export function formatDate(year, month, day) {
 export function daysInMonth(year, month) {
   return new Date(year, month, 0).getDate();
 }
+
+export function addDays(dateStr, days) {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const d = new Date(year, month - 1, day + days);
+  return formatDate(d.getFullYear(), d.getMonth() + 1, d.getDate());
+}
