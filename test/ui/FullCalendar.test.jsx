@@ -30,23 +30,27 @@ describe('FullCalendar', () => {
     expect(screen.getByText(/January\s+2024/)).toBeInTheDocument();
   });
 
-  it('renders month headings for all months from createdAt to initialMonth', () => {
-    renderCalendar({ initialYear: 2024, initialMonth: 3, createdAt: '2024-01-15' });
-    expect(screen.getByText(/January\s+2024/)).toBeInTheDocument();
-    expect(screen.getByText(/February\s+2024/)).toBeInTheDocument();
-    expect(screen.getByText(/March\s+2024/)).toBeInTheDocument();
+  it('renders all 12 months of the given year (Jan–Dec)', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 3 });
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    monthNames.forEach(name => {
+      expect(screen.getByText(new RegExp(`${name}\\s+2024`))).toBeInTheDocument();
+    });
   });
 
-  it('renders a month heading for a month in the past when createdAt is earlier', () => {
-    renderCalendar({ initialYear: 2024, initialMonth: 6, createdAt: '2024-03-01' });
-    expect(screen.getByText(/March\s+2024/)).toBeInTheDocument();
+  it('renders December even when initialMonth is earlier in the year', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 3 });
+    expect(screen.getByText(/December\s+2024/)).toBeInTheDocument();
   });
 
-  it('most recent month is rendered last (oldest at top, newest at bottom)', () => {
-    renderCalendar({ initialYear: 2024, initialMonth: 3, createdAt: '2024-01-01' });
-    const headings = screen.getAllByText(/\b(January|February|March)\s+2024/);
+  it('oldest month is rendered first (Jan at top, Dec at bottom)', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 6 });
+    const headings = screen.getAllByText(/\b(January|December)\s+2024/);
     expect(headings[0].textContent).toMatch(/January/);
-    expect(headings[headings.length - 1].textContent).toMatch(/March/);
+    expect(headings[headings.length - 1].textContent).toMatch(/December/);
   });
 
   it('does not render a "Previous" navigation button', () => {
@@ -98,20 +102,19 @@ describe('FullCalendar', () => {
     expect(screen.getByTestId('day-2024-02-29')).toBeInTheDocument();
   });
 
-  it('entries from multiple months are shown when createdAt spans months', () => {
+  it('entries from multiple months are shown', () => {
     const entries = [
       { date: '2024-01-05', status: 'pass' },
       { date: '2024-02-10', status: 'fail' },
     ];
-    renderCalendar({ initialYear: 2024, initialMonth: 2, createdAt: '2024-01-01', entries });
+    renderCalendar({ initialYear: 2024, initialMonth: 2, entries });
     expect(screen.getByTestId('day-2024-01-05')).toHaveClass('status-pass');
     expect(screen.getByTestId('day-2024-02-10')).toHaveClass('status-fail');
   });
 
-  it('without createdAt, renders from January of the current year', () => {
-    // June 2024 → start from January 2024; Jan–June must appear, Dec 2023 must not
+  it('renders all 12 months of initialYear regardless of initialMonth', () => {
     renderCalendar({ initialYear: 2024, initialMonth: 6 });
-    expect(screen.getByText(/June\s+2024/)).toBeInTheDocument();
+    expect(screen.getByText(/December\s+2024/)).toBeInTheDocument();
     expect(screen.getByText(/January\s+2024/)).toBeInTheDocument();
     expect(screen.queryByText(/December\s+2023/)).not.toBeInTheDocument();
   });
@@ -120,5 +123,13 @@ describe('FullCalendar', () => {
     renderCalendar({ initialYear: 2024, initialMonth: 1, entries: [] });
     // Day 15 has no entry, should be status-pending
     expect(screen.getByTestId('day-2024-01-15')).toHaveClass('status-pending');
+  });
+
+  it('future day cells have class "future" instead of a status class', () => {
+    // 2099 is entirely in the future
+    renderCalendar({ initialYear: 2099, initialMonth: 1 });
+    const cell = screen.getByTestId('day-2099-01-15');
+    expect(cell).toHaveClass('future');
+    expect(cell).not.toHaveClass('status-pending');
   });
 });

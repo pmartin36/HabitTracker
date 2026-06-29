@@ -557,6 +557,12 @@ input {
 
 .full-calendar-grid .day:hover { opacity: 0.75; }
 
+.full-calendar-grid .day.future {
+  opacity: 0.15;
+  cursor: default;
+  background: var(--border);
+}
+
 /* ===== Shared status classes (mini + full calendar) ===== */
 .status-pass {
   background: var(--sage);
@@ -672,6 +678,29 @@ a.full-calendar-link {
 
 .modal-close-btn:hover {
   color: var(--text-primary);
+}
+
+/* ===== Calendar Modal completion bar ===== */
+.cal-completion-bar {
+  margin-bottom: 16px;
+}
+.cal-completion-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  display: block;
+}
+.cal-completion-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cal-completion-fill {
+  height: 100%;
+  background: var(--sage);
+  border-radius: 2px;
+  transition: width 0.3s ease;
 }
 
 /* ===== Edit/Delete section in EditHabitModal ===== */
@@ -906,6 +935,26 @@ a.full-calendar-link {
 /* Year view: 4 columns */
 .mood-calendar-months.year-view {
   grid-template-columns: repeat(4, 1fr);
+}
+
+/* Cap the day cells in year view month grids */
+.mood-calendar-months.year-view .mood-day {
+  min-height: 0;
+  height: 28px;
+  font-size: 8px;
+}
+
+.mood-calendar-months.year-view .mood-emoji-row span {
+  font-size: 8px;
+}
+
+.mood-calendar-months.year-view .mood-day-num {
+  font-size: 7px;
+}
+
+/* Allow grid to shrink columns */
+.mood-calendar-months.year-view .mood-calendar-month {
+  min-width: 0;
 }
 
 

@@ -24,6 +24,13 @@ export default function CalendarModal({ habit, entries, onStatusChange, onClose,
     if (e.target === e.currentTarget) onClose();
   };
 
+  // Completion stats for the current year
+  const yearStr = String(currentYear);
+  const passCount = allEntries.filter(e => e.status === 'pass' && e.date.startsWith(yearStr)).length;
+  const today = new Date();
+  const startOfYear = new Date(today.getFullYear(), 0, 1);
+  const daysElapsed = Math.floor((today - startOfYear) / 86400000) + 1;
+
   const handleStatusChange = (date, status) => {
     // Optimistically update the local entry list so the calendar reflects the
     // change immediately, without waiting for App-level re-fetching (which only
@@ -52,6 +59,12 @@ export default function CalendarModal({ habit, entries, onStatusChange, onClose,
           >
             ×
           </button>
+        </div>
+        <div className="cal-completion-bar">
+          <span className="cal-completion-text">{passCount} / {daysElapsed} days completed</span>
+          <div className="cal-completion-track">
+            <div className="cal-completion-fill" style={{ width: `${Math.min(100, (passCount / daysElapsed) * 100)}%` }} />
+          </div>
         </div>
         <FullCalendar
           habitId={habit.id}

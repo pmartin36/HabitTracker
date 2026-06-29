@@ -4,30 +4,20 @@ import { MONTH_NAMES, formatDate, daysInMonth } from '../utils/date.js';
 
 const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function generateMonths(createdAt, initialYear, initialMonth) {
-  // Always show from January 1st of the current year (or createdAt if earlier)
-  const janFirst = new Date(initialYear, 0, 1);
-  const createdDate = createdAt ? new Date(createdAt) : janFirst;
-  const startDate = createdDate < janFirst ? createdDate : janFirst;
-
+function generateMonths(initialYear) {
   const months = [];
-  let y = initialYear;
-  let m = initialMonth;
-
-  while (
-    y > startDate.getFullYear() ||
-    (y === startDate.getFullYear() && m >= startDate.getMonth() + 1)
-  ) {
-    months.push({ year: y, month: m });
-    m--;
-    if (m === 0) { m = 12; y--; }
+  for (let m = 1; m <= 12; m++) {
+    months.push({ year: initialYear, month: m });
   }
-  return months; // already newest-first; rendered top-to-bottom
+  return months; // Jan first, Dec last
 }
 
 export default function FullCalendar({ entries, onStatusChange, initialYear, initialMonth, createdAt }) {
-  const months = generateMonths(createdAt, initialYear, initialMonth).reverse();
+  const months = generateMonths(initialYear);
   const entryMap = Object.fromEntries(entries.map(e => [e.date, e.status]));
+
+  const now = new Date();
+  const todayStr = formatDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
 
   return (
     <div className="full-calendar">
@@ -59,20 +49,23 @@ export default function FullCalendar({ entries, onStatusChange, initialYear, ini
               {DOW_LABELS.map(d => <span key={d}>{d}</span>)}
             </div>
             <div className="full-calendar-grid">
-              {cells.map(cell =>
-                cell.blank ? (
-                  <div key={cell.key} />
-                ) : (
+              {cells.map(cell => {
+                if (cell.blank) {
+                  return <div key={cell.key} />;
+                }
+                const isFuture = cell.dateStr > todayStr;
+                return (
                   <div
                     key={cell.key}
                     data-testid={`day-${cell.dateStr}`}
-                    className={`day status-${cell.status}`}
-                    onClick={() => onStatusChange(cell.dateStr, nextStatus(cell.status))}
+                    className={isFuture ? 'day future' : `day status-${cell.status}`}
+                    onClick={isFuture ? undefined : () => onStatusChange(cell.dateStr, nextStatus(cell.status))}
+                    style={isFuture ? { pointerEvents: 'none' } : undefined}
                   >
                     {cell.day}
                   </div>
-                )
-              )}
+                );
+              })}
             </div>
           </div>
         );
