@@ -1,6 +1,9 @@
-import './styles.css'
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.jsx';
+import CheckIn from './CheckIn.jsx';
+import './styles.css';
 
-createRoot(document.getElementById('root')).render(<App />)
+const path = window.location.pathname;
+const Root = path === '/checkin' ? CheckIn : App;
+createRoot(document.getElementById('root')).render(<Root />);

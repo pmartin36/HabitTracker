@@ -31,7 +31,7 @@ export async function buildNotificationMessage(db, asOfDate) {
   }
 
   lines.push('');
-  lines.push(process.env.APP_URL ?? 'http://localhost:3000');
+  lines.push(`${process.env.APP_URL ?? 'http://localhost:3000'}/checkin`);
 
   return lines.join('\n');
 }

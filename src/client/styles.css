@@ -1201,6 +1201,149 @@ em-emoji-picker {
   background: var(--text-tertiary);
 }
 
+/* ===== Check-In page ===== */
+.checkin-page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  min-height: 100vh;
+}
+
+.checkin-header {
+  margin-bottom: 32px;
+}
+
+.checkin-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.checkin-date {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.checkin-section {
+  margin-bottom: 32px;
+}
+
+.checkin-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  margin: 0 0 12px;
+}
+
+.checkin-mood-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.checkin-mood-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--surface);
+  font-size: 26px;
+  cursor: pointer;
+  transition: all 0.15s;
+  opacity: 0.5;
+}
+
+.checkin-mood-btn:hover { opacity: 0.8; }
+.checkin-mood-btn.active {
+  opacity: 1;
+  border-color: var(--sage);
+  background: var(--sage-dim);
+  transform: scale(1.15);
+}
+.checkin-mood-btn.locked { cursor: not-allowed; opacity: 0.3; }
+
+.checkin-locked-note {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-top: 8px;
+}
+
+.checkin-habits {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkin-habit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.checkin-habit-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.checkin-habit-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.checkin-btn {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.checkin-btn-pass { background: rgba(111,168,130,0.14); color: var(--sage); }
+.checkin-btn-pass.active { background: var(--sage); color: #091a10; }
+.checkin-btn-skip { background: rgba(196,154,90,0.14); color: var(--amber); }
+.checkin-btn-skip.active { background: var(--amber); color: #1a1000; }
+.checkin-btn-fail { background: rgba(176,104,104,0.14); color: var(--rose); }
+.checkin-btn-fail.active { background: var(--rose); color: #1a0505; }
+
+.checkin-done-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  text-align: center;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.15s;
+  margin-top: 16px;
+}
+
+.checkin-done-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
 /* ===== Responsive overrides (≤767px) ===== */
 @media (max-width: 767px) {
   .mood-calendar-months {
