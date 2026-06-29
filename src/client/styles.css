@@ -931,24 +931,52 @@ a.full-calendar-link {
   grid-template-columns: repeat(4, 1fr);
 }
 
-/* Cap the day cells in year view month grids */
+/* Equal horizontal and vertical gap in year view grids */
+.mood-calendar-months.year-view .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+/* Square cells via aspect-ratio; clip content rather than stretching */
 .mood-calendar-months.year-view .mood-day {
+  aspect-ratio: 1;
+  height: auto;
   min-height: 0;
-  height: 28px;
-  font-size: 8px;
+  padding: 2px;
+  overflow: hidden;
 }
 
 .mood-calendar-months.year-view .mood-emoji-row span {
-  font-size: 8px;
+  font-size: 7px;
+  line-height: 1;
 }
 
 .mood-calendar-months.year-view .mood-day-num {
-  font-size: 7px;
+  font-size: 6px;
+}
+
+/* The emoji container must not expand the cell */
+.mood-calendar-months.year-view .mood-day-emojis {
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.mood-calendar-months.year-view .mood-emoji-row {
+  flex-wrap: nowrap;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 /* Allow grid to shrink columns */
 .mood-calendar-months.year-view .mood-calendar-month {
   min-width: 0;
+}
+
+/* Future month cells: dimmed, no interaction */
+.mood-day-future {
+  pointer-events: none;
+  opacity: 0.4;
 }
 
 

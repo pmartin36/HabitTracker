@@ -60,7 +60,7 @@ export default function MoodCalendar({ moods, habitPasses, initialYear, initialM
   function renderMonth(y, m, applyFutureFilter) {
     const isFuture = applyFutureFilter &&
       (y > currentYear || (y === currentYear && m > currentMonthNum));
-    const days = isFuture ? [] : buildMoodDays(y, m);
+    const days = buildMoodDays(y, m);
     return (
       <div key={`${y}-${m}`} className="mood-calendar-month">
         <div className="mood-calendar-month-heading">
@@ -68,10 +68,21 @@ export default function MoodCalendar({ moods, habitPasses, initialYear, initialM
         </div>
         <div className="calendar-grid">
           {days.map(dateStr => {
+            const day = parseInt(dateStr.split('-')[2], 10);
+            if (isFuture) {
+              return (
+                <div
+                  key={dateStr}
+                  className="mood-day mood-none mood-day-future"
+                  data-testid={`mood-day-${dateStr}`}
+                >
+                  <span className="mood-day-num">{day}</span>
+                </div>
+              );
+            }
             const rating = moodMap[dateStr];
             const entry = rating != null ? { rating } : undefined;
             const passes = (habitPasses || []).filter(p => p.date === dateStr);
-            const day = parseInt(dateStr.split('-')[2], 10);
             return (
               <MoodDayCell
                 key={dateStr}
