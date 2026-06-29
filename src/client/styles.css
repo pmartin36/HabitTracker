@@ -1323,25 +1323,53 @@ em-emoji-picker {
 .checkin-btn-fail { background: rgba(176,104,104,0.14); color: var(--rose); }
 .checkin-btn-fail.active { background: var(--rose); color: #1a0505; }
 
-.checkin-done-btn {
-  display: block;
-  width: 100%;
+.checkin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 16px;
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-secondary);
-  text-align: center;
-  text-decoration: none;
-  font-size: 15px;
-  font-weight: 500;
-  transition: all 0.15s;
-  margin-top: 16px;
 }
-
-.checkin-done-btn:hover {
-  border-color: var(--border-strong);
-  color: var(--text-primary);
+.checkin-modal {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: 18px;
+  padding: 24px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+.checkin-modal-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+.checkin-done-btn {
+  flex: 1;
+  height: 48px;
+  background: var(--sage);
+  color: #091a10;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.checkin-dismiss-btn {
+  height: 48px;
+  padding: 0 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  font-size: 14px;
+  cursor: pointer;
 }
 
 /* ===== Responsive overrides (≤767px) ===== */

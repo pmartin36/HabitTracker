@@ -4,6 +4,7 @@ import MobileHabitView from './components/MobileHabitView.jsx';
 import MoodStrip from './components/MoodStrip.jsx';
 import MoodCalendar from './components/MoodCalendar.jsx';
 import AddHabitModal from './components/AddHabitModal.jsx';
+import CheckInModal from './components/CheckInModal.jsx';
 import { todayString, addDays } from './utils/date.js';
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
   const [streaks, setStreaks] = useState({});
   const [showMoodCalendar, setShowMoodCalendar] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showCheckinModal, setShowCheckinModal] = useState(() => window.location.pathname === '/checkin');
   const [isDesktop] = useState(() => window.innerWidth >= 768);
 
   const today = todayString();
@@ -193,6 +195,14 @@ export default function App() {
         <AddHabitModal
           onSubmit={handleAddHabitSubmit}
           onClose={() => setShowAddModal(false)}
+        />
+      )}
+      {showCheckinModal && (
+        <CheckInModal
+          onClose={() => {
+            setShowCheckinModal(false);
+            window.history.replaceState({}, '', '/');
+          }}
         />
       )}
     </div>
