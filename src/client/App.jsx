@@ -3,6 +3,7 @@ import HabitBoard from './components/HabitBoard.jsx';
 import MobileHabitView from './components/MobileHabitView.jsx';
 import MoodStrip from './components/MoodStrip.jsx';
 import MoodCalendar from './components/MoodCalendar.jsx';
+import AddHabitModal from './components/AddHabitModal.jsx';
 import { todayString } from './utils/date.js';
 
 export default function App() {
@@ -10,10 +11,16 @@ export default function App() {
   const [entries, setEntries] = useState([]);
   const [moods, setMoods] = useState([]);
   const [showMoodCalendar, setShowMoodCalendar] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [isDesktop] = useState(() => window.innerWidth >= 768);
 
   const today = todayString();
   const currentMonth = today.slice(0, 7);
+
+  const fetchHabits = async () => {
+    const data = await fetch('/api/habits').then(r => r.json());
+    setHabits(data);
+  };
 
   const fetchEntries = async () => {
     const data = await fetch(`/api/entries?month=${currentMonth}`).then(r => r.json());
@@ -57,6 +64,18 @@ export default function App() {
     await fetchMoods();
   };
 
+  const onAddHabit = () => setShowAddModal(true);
+
+  const handleAddHabitSubmit = async (name, emoji) => {
+    await fetch('/api/habits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, emoji }),
+    });
+    await fetchHabits();
+    setShowAddModal(false);
+  };
+
   const todayMood = moods.find((m) => m.date === today && m.rating != null);
 
   const habitPasses = entries
@@ -84,12 +103,20 @@ export default function App() {
           habits={habits}
           entries={entries}
           onStatusChange={handleStatusChange}
+          onAddHabit={onAddHabit}
         />
       ) : (
         <MobileHabitView
           habits={habits}
           entries={entries}
           onStatusChange={handleStatusChange}
+          onAddHabit={onAddHabit}
+        />
+      )}
+      {showAddModal && (
+        <AddHabitModal
+          onSubmit={handleAddHabitSubmit}
+          onClose={() => setShowAddModal(false)}
         />
       )}
     </div>

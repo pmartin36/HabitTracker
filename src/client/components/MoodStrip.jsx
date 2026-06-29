@@ -1,12 +1,15 @@
 import React from 'react';
 
-const ICONS = ['😄', '🙂', '😐', '🙁', '😣'];
+// Ordered rough→great so that 😣 (rating 5) appears on the LEFT
+// and 😄 (rating 1) appears on the RIGHT.
+const ICONS = ['😣', '🙁', '😐', '🙂', '😄'];
 
 export default function MoodStrip({ currentRating, isEditable, onRatingChange }) {
   return (
     <div className={`mood-strip${isEditable ? '' : ' locked'}`}>
       {ICONS.map((icon, i) => {
-        const rating = i + 1;
+        // rating counts down: index 0 → 5, index 4 → 1
+        const rating = ICONS.length - i;
         return (
           <span
             key={rating}

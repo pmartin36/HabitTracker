@@ -1,31 +1,25 @@
 /* ===== Design tokens ===== */
 :root {
-  --color-pass:        #7eb89a;
-  --color-skip:        #c9956c;
-  --color-fail:        #b56b6b;
-  --color-pending-bg:  #ebebeb;
-  --color-pending-bdr: #c0bfbd;
+  --sage:         #7fa98b;
+  --sage-light:   #e8f2ec;
+  --amber:        #c4935a;
+  --amber-light:  #f5ead8;
+  --rose:         #b06060;
+  --rose-light:   #f2e2e2;
 
-  --color-mood-1: #7eb89a;   /* sage – great */
-  --color-mood-2: #a8cba8;   /* light sage/yellow-green */
-  --color-mood-3: #c5bfb5;   /* neutral warm grey */
-  --color-mood-4: #c9956c;   /* soft amber */
-  --color-mood-5: #b56b6b;   /* muted red-grey – rough */
-  --color-mood-none: #f0efed;
+  --neutral-50:   #fafaf9;
+  --neutral-100:  #f5f4f2;
+  --neutral-200:  #e8e6e2;
+  --neutral-300:  #d4d1cb;
+  --neutral-400:  #a8a49e;
+  --neutral-600:  #6b6760;
+  --neutral-900:  #1c1a18;
 
-  --bg-app:   #f7f5f2;
-  --bg-card:  #ffffff;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
 
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-
-  --radius-card:   12px;
-  --radius-pill:   999px;
-
-  --text-primary:   #2c2c2c;
-  --text-secondary: #6e6e6e;
-  --text-muted:     #9e9e9e;
-
-  --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius:    12px;
+  --radius-sm: 8px;
 }
 
 /* ===== Reset & base ===== */
@@ -38,237 +32,296 @@
 }
 
 body {
-  font-family: var(--font);
-  background: var(--bg-app);
-  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--neutral-100);
+  color: var(--neutral-900);
   min-height: 100vh;
-  font-size: 15px;
   line-height: 1.5;
+  font-size: 15px;
+}
+
+button,
+input {
+  font-family: inherit;
+  font-size: inherit;
 }
 
 button {
-  font-family: inherit;
-  font-size: inherit;
   cursor: pointer;
   border: none;
-  outline: none;
   background: none;
+  outline: none;
 }
 
 button:disabled {
   cursor: default;
-  opacity: 0.4;
+  opacity: 0.35;
+}
+
+input {
+  outline: none;
 }
 
 /* ===== App shell ===== */
 .app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-bottom: 2rem;
 }
 
 /* ===== Mood strip ===== */
 .mood-strip {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1rem;
-  background: var(--bg-app);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.mood-strip.locked {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.mood-strip.locked .mood-icon {
-  cursor: not-allowed;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(245, 244, 242, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--neutral-200);
+  margin: -24px -24px 0;
 }
 
 .mood-icon {
-  font-size: 1.5rem;
-  opacity: 0.45;
+  width: 32px;
+  height: 32px;
+  font-size: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
   cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity 0.15s, transform 0.15s, background 0.15s;
   user-select: none;
   line-height: 1;
 }
 
 .mood-icon:hover {
-  opacity: 0.75;
+  opacity: 0.7;
 }
 
 .mood-icon.active {
   opacity: 1;
-  transform: scale(1.2);
+  transform: scale(1.25);
+  background: var(--neutral-200);
 }
 
-/* Mood calendar button */
+.mood-strip.locked .mood-icon {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.mood-strip.locked .mood-icon:hover {
+  opacity: 0.3;
+}
+
+/* Mood Calendar toggle button */
 .app > button {
   align-self: center;
-  margin: 0.5rem auto 0;
-  padding: 0.3rem 0.9rem;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  border: 1px solid var(--color-pending-bdr);
-  border-radius: var(--radius-pill);
+  margin: 12px auto 0;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--neutral-600);
+  border: 1px solid var(--neutral-200);
+  border-radius: 999px;
   background: transparent;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
+  letter-spacing: 0.01em;
 }
 
 .app > button:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--neutral-200);
+  color: var(--neutral-900);
 }
 
-/* ===== Habit board — desktop (≥768px) ===== */
+/* ===== Habit board — desktop ===== */
 .habit-board {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1.25rem 1.25rem 1.5rem;
+  gap: 20px;
+  padding: 24px 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* "+" add-habit button inside board */
+/* "+" add-habit button inside the board */
 .habit-board > button {
   flex-shrink: 0;
-  align-self: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
-  border: 1.5px dashed var(--color-pending-bdr);
-  color: var(--text-muted);
-  font-size: 1.25rem;
-  line-height: 1;
+  width: 260px;
+  height: 80px;
+  border: 2px dashed var(--neutral-300);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--neutral-400);
+  font-size: 28px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  align-self: flex-start;
 }
 
 .habit-board > button:hover {
-  border-color: var(--text-secondary);
-  color: var(--text-secondary);
+  border-color: var(--neutral-400);
+  color: var(--neutral-600);
+  background: var(--neutral-50);
+}
+
+/* Empty-state text */
+.empty-state {
+  color: var(--neutral-400);
+  font-size: 16px;
+  padding: 60px;
+  text-align: center;
 }
 
 /* ===== Habit card ===== */
 .habit-card {
   flex-shrink: 0;
-  width: 220px;
-  background: var(--bg-card);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  padding: 1rem;
+  width: 260px;
+  background: #ffffff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--neutral-200);
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  transition: background 0.35s ease;
+  gap: 16px;
+  transition: box-shadow 0.2s;
+}
+
+.habit-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* Micro-interaction: card wash on Done! */
 @keyframes card-wash {
-  0%   { background: var(--bg-card); }
-  30%  { background: #d9ece3; }
-  100% { background: var(--bg-card); }
+  0%   { background: #ffffff; }
+  30%  { background: var(--sage-light); }
+  100% { background: #ffffff; }
 }
 
 .habit-card.just-passed {
   animation: card-wash 0.6s ease forwards;
 }
 
+/* Card header */
 .habit-name {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-/* ===== Habit actions (Done!/Skip/Fail buttons) ===== */
-.habit-actions {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--neutral-900);
   display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
-.habit-actions button {
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: filter 0.12s ease, transform 0.1s ease;
-  color: #fff;
-}
-
-.habit-actions button:hover {
-  filter: brightness(1.08);
-}
-
-.habit-actions button:active {
-  transform: scale(0.96);
-}
-
-/* Done! button — sage green with bounce animation */
-@keyframes btn-bounce {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.12); }
-  70%  { transform: scale(0.96); }
-  100% { transform: scale(1); }
-}
-
-.habit-actions button:nth-child(1) {
-  background: var(--color-pass);
-}
-
-.habit-actions button:nth-child(1):active {
-  animation: btn-bounce 0.3s ease forwards;
-}
-
-/* Skip button — amber/clay */
-.habit-actions button:nth-child(2) {
-  background: var(--color-skip);
-}
-
-/* Fail button — muted red-grey */
-.habit-actions button:nth-child(3) {
-  background: var(--color-fail);
+.habit-emoji {
+  font-size: 18px;
+  line-height: 1;
 }
 
 /* ===== Streak ===== */
 .streak {
-  font-size: 2rem;
+  font-size: 48px;
   font-weight: 700;
-  color: var(--text-primary);
+  letter-spacing: -2px;
+  color: var(--neutral-900);
   line-height: 1;
 }
 
 .streak-label {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--neutral-400);
+  margin-top: 2px;
+}
+
+/* ===== Habit actions (Done! / Skip / Fail) ===== */
+.habit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.habit-actions button {
+  width: 100%;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  border: none;
+}
+
+.habit-actions button:active {
+  transform: scale(0.97);
+}
+
+/* Done! */
+.habit-actions button:nth-child(1) {
+  background: var(--sage-light);
+  color: var(--sage);
+}
+
+.habit-actions button:nth-child(1):hover {
+  background: var(--sage);
+  color: #ffffff;
+}
+
+/* Skip */
+.habit-actions button:nth-child(2) {
+  background: var(--amber-light);
+  color: var(--amber);
+}
+
+.habit-actions button:nth-child(2):hover {
+  background: var(--amber);
+  color: #ffffff;
+}
+
+/* Fail */
+.habit-actions button:nth-child(3) {
+  background: var(--rose-light);
+  color: var(--rose);
+}
+
+.habit-actions button:nth-child(3):hover {
+  background: var(--rose);
+  color: #ffffff;
 }
 
 /* ===== Mini calendar ===== */
 .mini-calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 3px;
+  margin-top: 4px;
 }
 
 .mini-calendar .day {
   aspect-ratio: 1;
-  border-radius: 3px;
-  font-size: 0.62rem;
+  border-radius: 4px;
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--text-secondary);
   transition: opacity 0.1s;
+  user-select: none;
 }
 
 .mini-calendar .day:hover {
@@ -279,9 +332,10 @@ button:disabled {
 .full-calendar {
   max-width: 480px;
   margin: 1rem auto;
-  background: var(--bg-card);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+  background: #ffffff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--neutral-200);
   padding: 1rem;
 }
 
@@ -309,33 +363,79 @@ button:disabled {
 
 /* ===== Shared status classes (mini + full calendar) ===== */
 .status-pass {
-  background: var(--color-pass);
-  color: #fff;
+  background: var(--sage);
+  color: #ffffff;
 }
 
 .status-skip {
-  background: var(--color-skip);
-  color: #fff;
+  background: var(--amber);
+  color: #ffffff;
 }
 
 .status-fail {
-  background: var(--color-fail);
-  color: #fff;
+  background: var(--rose);
+  color: #ffffff;
 }
 
 .status-pending {
-  background: var(--color-pending-bg);
-  color: var(--text-secondary);
-  border: 1.5px dashed var(--color-pending-bdr);
+  background: var(--neutral-100);
+  color: var(--neutral-400);
+  border: 1px dashed var(--neutral-300);
+}
+
+/* ===== "Go to full calendar" link ===== */
+.full-calendar-link,
+a.full-calendar-link {
+  font-size: 12px;
+  color: var(--neutral-400);
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  display: block;
+  text-align: right;
+  transition: color 0.15s;
+}
+
+.full-calendar-link:hover {
+  color: var(--neutral-600);
+}
+
+/* ===== Calendar header (shared by full + mood calendars) ===== */
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar-header h2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--neutral-900);
+}
+
+.calendar-header button {
+  font-size: 0.8rem;
+  color: var(--neutral-600);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-200);
+  transition: background 0.15s;
+}
+
+.calendar-header button:hover {
+  background: var(--neutral-200);
 }
 
 /* ===== Mood calendar ===== */
 .mood-calendar {
   max-width: 480px;
   margin: 1rem auto;
-  background: var(--bg-card);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+  background: #ffffff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--neutral-200);
   padding: 1rem;
 }
 
@@ -359,65 +459,167 @@ button:disabled {
 }
 
 /* Mood day cell classes */
-.mood-1    { background: var(--color-mood-1); }
-.mood-2    { background: var(--color-mood-2); }
-.mood-3    { background: var(--color-mood-3); }
-.mood-4    { background: var(--color-mood-4); }
-.mood-5    { background: var(--color-mood-5); }
-.mood-none { background: var(--color-mood-none); }
+.mood-1    { background: #7fa98b; color: #ffffff; }
+.mood-2    { background: #a8c4a0; color: #ffffff; }
+.mood-3    { background: #c8c4bc; color: var(--neutral-900); }
+.mood-4    { background: #c4a07a; color: #ffffff; }
+.mood-5    { background: #b87070; color: #ffffff; }
+.mood-none { background: var(--neutral-100); border: 1px solid var(--neutral-200); }
 
-/* ===== Calendar header (shared by full + mood calendars) ===== */
-.calendar-header {
+/* ===== Add habit modal ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  z-index: 100;
 }
 
-.calendar-header h2 {
-  font-size: 0.95rem;
+.modal-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px;
+  width: 400px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin-bottom: 20px;
+}
+
+.modal-field {
+  margin-bottom: 20px;
+}
+
+.modal-label {
+  display: block;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--neutral-400);
+  margin-bottom: 8px;
 }
 
-.calendar-header button {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-pending-bdr);
-  transition: background 0.15s;
+.modal-input {
+  width: 100%;
+  height: 44px;
+  border: 1.5px solid var(--neutral-200);
+  border-radius: var(--radius-sm);
+  padding: 0 14px;
+  font-size: 15px;
+  color: var(--neutral-900);
+  background: #ffffff;
+  transition: border-color 0.15s;
 }
 
-.calendar-header button:hover {
-  background: rgba(0, 0, 0, 0.04);
+.modal-input:focus {
+  border-color: var(--sage);
 }
 
-/* ===== "Go to full calendar" link ===== */
-.full-calendar-link,
-a.full-calendar-link {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  text-decoration: underline;
+.modal-input::placeholder {
+  color: var(--neutral-400);
+}
+
+.modal-error {
+  font-size: 13px;
+  color: var(--rose);
+  margin-top: 6px;
+}
+
+/* Emoji picker grid */
+.emoji-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.emoji-option {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--neutral-100);
+  border: 1.5px solid transparent;
   cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, transform 0.1s;
+}
+
+.emoji-option:hover {
+  background: var(--neutral-200);
+}
+
+.emoji-option.selected {
+  background: var(--sage-light);
+  border-color: var(--sage);
+}
+
+.emoji-option:active {
+  transform: scale(0.92);
+}
+
+/* Modal action buttons */
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.modal-submit {
+  width: 100%;
+  height: 44px;
+  background: var(--sage);
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.modal-submit:hover {
+  opacity: 0.9;
+}
+
+.modal-submit:active {
+  transform: scale(0.98);
+}
+
+.modal-cancel {
   background: none;
   border: none;
-  padding: 0;
-  display: block;
-  text-align: right;
+  color: var(--neutral-400);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
   transition: color 0.15s;
+  text-align: center;
 }
 
-.full-calendar-link:hover {
-  color: var(--text-secondary);
+.modal-cancel:hover {
+  color: var(--neutral-600);
 }
 
-/* ===== Mobile habit view (<768px) ===== */
+/* ===== Mobile habit view ===== */
 .mobile-habit-view {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: 16px;
+  padding: 16px;
 }
 
 .mobile-habit-view .habit-card {
@@ -428,52 +630,113 @@ a.full-calendar-link {
 /* Indicator dots */
 .indicator-dots {
   display: flex;
-  gap: 6px;
+  flex-direction: row;
   justify-content: center;
+  gap: 8px;
 }
 
 .indicator-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--color-pending-bdr);
-  transition: background 0.15s, transform 0.15s;
+  background: var(--neutral-300);
+  transition: background 0.15s, width 0.15s, border-radius 0.15s;
 }
 
 .indicator-dot.active {
-  background: var(--text-secondary);
-  transform: scale(1.25);
+  background: var(--neutral-900);
+  width: 24px;
+  border-radius: 4px;
 }
 
-/* Navigation buttons in mobile view */
+/* Navigation buttons — subtle icon style */
 .navigation {
   display: flex;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
-.navigation button {
-  padding: 0.35rem 1rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-pending-bdr);
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  transition: background 0.15s;
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--neutral-200);
+  background: #ffffff;
+  color: var(--neutral-600);
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  box-shadow: var(--shadow-sm);
 }
 
-.navigation button:not(:disabled):hover {
-  background: rgba(0, 0, 0, 0.04);
+.nav-btn:not(:disabled):hover {
+  background: var(--neutral-100);
+  border-color: var(--neutral-300);
+  color: var(--neutral-900);
 }
 
-/* ===== Responsive overrides ===== */
+/* Mobile add habit button */
+.add-habit-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px dashed var(--neutral-300);
+  background: transparent;
+  color: var(--neutral-400);
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.add-habit-btn:hover {
+  border-color: var(--neutral-400);
+  color: var(--neutral-600);
+  background: var(--neutral-50);
+}
+
+/* ===== Scrollbar styling ===== */
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neutral-200);
+  border-radius: 3px;
+}
+
+/* ===== Responsive overrides (≤767px) ===== */
 @media (max-width: 767px) {
+  .app {
+    padding: 16px;
+  }
+
+  .mood-strip {
+    margin: -16px -16px 0;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .habit-board {
     flex-direction: column;
     align-items: stretch;
     overflow-x: visible;
-    padding: 0.75rem;
+    padding: 12px 0;
   }
 
   .habit-card {
+    width: 100%;
+  }
+
+  .habit-board > button {
     width: 100%;
   }
 }

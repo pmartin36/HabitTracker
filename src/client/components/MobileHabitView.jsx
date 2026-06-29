@@ -2,14 +2,19 @@ import React, { useState } from 'react';
 import { todayString } from '../utils/date.js';
 import HabitActions from './HabitActions.jsx';
 
-export default function MobileHabitView({ habits, entries, onStatusChange }) {
+export default function MobileHabitView({ habits, entries, onStatusChange, onAddHabit }) {
   const [index, setIndex] = useState(0);
   const today = todayString();
 
   if (habits.length === 0) {
     return (
       <div className="mobile-habit-view">
-        <p>No habits yet.</p>
+        <p className="empty-state">Add your first habit →</p>
+        {onAddHabit && (
+          <button className="add-habit-btn" onClick={onAddHabit} aria-label="Add habit">
+            +
+          </button>
+        )}
       </div>
     );
   }
@@ -21,7 +26,10 @@ export default function MobileHabitView({ habits, entries, onStatusChange }) {
   return (
     <div className="mobile-habit-view">
       <div className="habit-card">
-        <span className="habit-name">{habit.name}</span>
+        <span className="habit-name">
+          {habit.emoji && <span className="habit-emoji">{habit.emoji} </span>}
+          {habit.name}
+        </span>
         <HabitActions habitId={habit.id} date={today} onStatusChange={onStatusChange} />
       </div>
       <div className="indicator-dots">
@@ -34,9 +42,28 @@ export default function MobileHabitView({ habits, entries, onStatusChange }) {
         ))}
       </div>
       <div className="navigation">
-        <button onClick={() => setIndex(i => i - 1)} disabled={isFirst}>Previous</button>
-        <button onClick={() => setIndex(i => i + 1)} disabled={isLast}>Next</button>
+        <button
+          aria-label="Previous"
+          className="nav-btn"
+          onClick={() => setIndex(i => i - 1)}
+          disabled={isFirst}
+        >
+          ‹
+        </button>
+        <button
+          aria-label="Next"
+          className="nav-btn"
+          onClick={() => setIndex(i => i + 1)}
+          disabled={isLast}
+        >
+          ›
+        </button>
       </div>
+      {habits.length < 5 && onAddHabit && (
+        <button className="add-habit-btn mobile-add" onClick={onAddHabit} aria-label="Add habit">
+          +
+        </button>
+      )}
     </div>
   );
 }
