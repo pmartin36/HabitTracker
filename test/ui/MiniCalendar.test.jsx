@@ -8,7 +8,7 @@ import MiniCalendar from '../../src/client/components/MiniCalendar.jsx';
 const YEAR = 2024;
 const MONTH = 1;
 
-function renderCalendar({ entries = [], onStatusChange = vi.fn() } = {}) {
+function renderCalendar({ entries = [], onStatusChange = vi.fn(), today } = {}) {
   return render(
     <MiniCalendar
       habitId={1}
@@ -16,6 +16,7 @@ function renderCalendar({ entries = [], onStatusChange = vi.fn() } = {}) {
       onStatusChange={onStatusChange}
       year={YEAR}
       month={MONTH}
+      today={today}
     />
   );
 }
@@ -69,7 +70,7 @@ describe('MiniCalendar', () => {
     const user = userEvent.setup();
     const onStatusChange = vi.fn();
     const entries = [{ date: '2024-01-05', status: 'pass' }];
-    renderCalendar({ entries, onStatusChange });
+    renderCalendar({ entries, onStatusChange, today: '2024-01-05' });
     await user.click(screen.getByTestId('day-2024-01-05'));
     expect(onStatusChange).toHaveBeenCalledWith('2024-01-05', 'skip');
   });
@@ -78,7 +79,7 @@ describe('MiniCalendar', () => {
     const user = userEvent.setup();
     const onStatusChange = vi.fn();
     const entries = [{ date: '2024-01-15', status: 'skip' }];
-    renderCalendar({ entries, onStatusChange });
+    renderCalendar({ entries, onStatusChange, today: '2024-01-15' });
     await user.click(screen.getByTestId('day-2024-01-15'));
     expect(onStatusChange).toHaveBeenCalledWith('2024-01-15', 'fail');
   });
@@ -87,7 +88,7 @@ describe('MiniCalendar', () => {
     const user = userEvent.setup();
     const onStatusChange = vi.fn();
     const entries = [{ date: '2024-01-10', status: 'fail' }];
-    renderCalendar({ entries, onStatusChange });
+    renderCalendar({ entries, onStatusChange, today: '2024-01-10' });
     await user.click(screen.getByTestId('day-2024-01-10'));
     expect(onStatusChange).toHaveBeenCalledWith('2024-01-10', 'pending');
   });
@@ -96,7 +97,7 @@ describe('MiniCalendar', () => {
     const user = userEvent.setup();
     const onStatusChange = vi.fn();
     const entries = [{ date: '2024-01-20', status: 'pending' }];
-    renderCalendar({ entries, onStatusChange });
+    renderCalendar({ entries, onStatusChange, today: '2024-01-20' });
     await user.click(screen.getByTestId('day-2024-01-20'));
     expect(onStatusChange).toHaveBeenCalledWith('2024-01-20', 'pass');
   });
@@ -104,7 +105,7 @@ describe('MiniCalendar', () => {
   it('clicking a day with no entry (defaults to pending) cycles to pass', async () => {
     const user = userEvent.setup();
     const onStatusChange = vi.fn();
-    renderCalendar({ entries: [], onStatusChange });
+    renderCalendar({ entries: [], onStatusChange, today: '2024-01-07' });
     await user.click(screen.getByTestId('day-2024-01-07'));
     expect(onStatusChange).toHaveBeenCalledWith('2024-01-07', 'pass');
   });
@@ -147,5 +148,21 @@ describe('MiniCalendar', () => {
     const dayCells = screen.getAllByTestId(/^day-2023-02-\d{2}$/);
     const inMonthCells = dayCells.filter(el => !el.classList.contains('day-outside'));
     expect(inMonthCells).toHaveLength(28);
+  });
+
+  it('clicking a locked day (outside the grace window) does not call onStatusChange', async () => {
+    const user = userEvent.setup();
+    const onStatusChange = vi.fn();
+    render(
+      <MiniCalendar
+        habitId={1}
+        entries={[]}
+        onStatusChange={onStatusChange}
+        year={2023}
+        month={6}
+      />
+    );
+    await user.click(screen.getByTestId('day-2023-06-15'));
+    expect(onStatusChange).not.toHaveBeenCalled();
   });
 });

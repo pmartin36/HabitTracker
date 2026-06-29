@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { nextStatus } from '../utils/status.js';
-import { MONTH_NAMES, formatDate, daysInMonth } from '../utils/date.js';
+import { MONTH_NAMES, formatDate, daysInMonth, todayString, addDays } from '../utils/date.js';
 
 const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -12,12 +12,26 @@ function generateMonths(initialYear) {
   return months; // Jan first, Dec last
 }
 
-export default function FullCalendar({ entries, onStatusChange, initialYear, initialMonth, createdAt }) {
+export default function FullCalendar({ entries, onStatusChange, initialYear, initialMonth, createdAt, today: todayProp }) {
   const months = generateMonths(initialYear);
   const entryMap = Object.fromEntries(entries.map(e => [e.date, e.status]));
 
-  const now = new Date();
-  const todayStr = formatDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  const todayStr = todayProp ?? todayString();
+  const yesterdayStr = addDays(todayStr, -1);
+
+  const [flashingDate, setFlashingDate] = useState(null);
+
+  function handleCellClick(dateStr, currentStatus) {
+    const isEditable = dateStr === todayStr || dateStr === yesterdayStr;
+    const isFuture = dateStr > todayStr;
+    if (isFuture) return;
+    if (!isEditable) {
+      setFlashingDate(dateStr);
+      setTimeout(() => setFlashingDate(null), 400);
+      return;
+    }
+    onStatusChange(dateStr, nextStatus(currentStatus));
+  }
 
   return (
     <div className="full-calendar">
@@ -53,14 +67,19 @@ export default function FullCalendar({ entries, onStatusChange, initialYear, ini
                 if (cell.blank) {
                   return <div key={cell.key} />;
                 }
+                const isEditable = cell.dateStr === todayStr || cell.dateStr === yesterdayStr;
                 const isFuture = cell.dateStr > todayStr;
                 return (
                   <div
                     key={cell.key}
                     data-testid={`day-${cell.dateStr}`}
-                    className={isFuture ? 'day future' : `day status-${cell.status}`}
-                    onClick={isFuture ? undefined : () => onStatusChange(cell.dateStr, nextStatus(cell.status))}
-                    style={isFuture ? { pointerEvents: 'none' } : undefined}
+                    className={[
+                      'day',
+                      isFuture ? 'future' : `status-${cell.status}`,
+                      !isEditable && !isFuture ? 'locked-day' : '',
+                      flashingDate === cell.dateStr ? 'flash-locked' : '',
+                    ].filter(Boolean).join(' ')}
+                    onClick={() => handleCellClick(cell.dateStr, cell.status)}
                   >
                     {cell.day}
                   </div>

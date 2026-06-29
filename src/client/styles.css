@@ -563,6 +563,19 @@ input {
   background: var(--border);
 }
 
+.day.locked-day {
+  cursor: default;
+}
+
+@keyframes flash-locked {
+  0%   { background: var(--rose); opacity: 1; }
+  100% { background: inherit; opacity: 0.7; }
+}
+
+.day.flash-locked {
+  animation: flash-locked 0.4s ease-out forwards;
+}
+
 /* ===== Shared status classes (mini + full calendar) ===== */
 .status-pass {
   background: var(--sage);

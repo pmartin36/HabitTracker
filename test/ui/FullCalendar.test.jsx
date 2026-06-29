@@ -11,6 +11,7 @@ function renderCalendar({
   initialYear = 2024,
   initialMonth = 1,
   createdAt = undefined,
+  today = undefined,
 } = {}) {
   return render(
     <FullCalendar
@@ -20,6 +21,7 @@ function renderCalendar({
       initialYear={initialYear}
       initialMonth={initialMonth}
       createdAt={createdAt}
+      today={today}
     />
   );
 }
@@ -91,7 +93,7 @@ describe('FullCalendar', () => {
     const user = userEvent.setup();
     const onStatusChange = vi.fn();
     const entries = [{ date: '2024-01-05', status: 'pass' }];
-    renderCalendar({ initialYear: 2024, initialMonth: 1, entries, onStatusChange });
+    renderCalendar({ initialYear: 2024, initialMonth: 1, entries, onStatusChange, today: '2024-01-05' });
     await user.click(screen.getByTestId('day-2024-01-05'));
     expect(onStatusChange).toHaveBeenCalledWith('2024-01-05', 'skip');
   });
@@ -131,5 +133,13 @@ describe('FullCalendar', () => {
     const cell = screen.getByTestId('day-2099-01-15');
     expect(cell).toHaveClass('future');
     expect(cell).not.toHaveClass('status-pending');
+  });
+
+  it('clicking a locked day (outside the grace window) does not call onStatusChange', async () => {
+    const user = userEvent.setup();
+    const onStatusChange = vi.fn();
+    renderCalendar({ initialYear: 2023, initialMonth: 1, onStatusChange });
+    await user.click(screen.getByTestId('day-2023-01-15'));
+    expect(onStatusChange).not.toHaveBeenCalled();
   });
 });
