@@ -57,7 +57,7 @@ export async function buildGraceWarningMessage(db, asOfDate) {
   const lines = ['⚠️ Habit Check-In — Yesterday still has pending habits!', ''];
 
   for (const habit of pendingHabits) {
-    lines.push(`⚪ ${habit.name}: Pending`);
+    lines.push(`${STATUS_EMOJI.pending} ${habit.name}: ${capitalize('pending')}`);
   }
 
   lines.push('');
@@ -96,6 +96,7 @@ export async function buildEveningMessage(db, asOfDate) {
 }
 
 export function sendNotification(message, ntfyUrl) {
+  if (message == null) return Promise.resolve();
   return fetch(ntfyUrl, {
     method: 'POST',
     body: message,
