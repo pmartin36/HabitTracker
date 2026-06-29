@@ -826,6 +826,59 @@ a.full-calendar-link {
 .mood-5    { background: var(--rose);   color: #1f0505; }
 .mood-none { background: var(--surface-raised); border: 1px solid var(--border); }
 
+/* Mood calendar header */
+.mood-cal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.mood-cal-title {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.mood-cal-nav {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mood-cal-nav:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.mood-view-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.mood-view-toggle button {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+.mood-view-toggle button.active {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+/* Year view: 4 columns */
+.mood-calendar-months.year-view {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 
 /* ===== Add habit modal ===== */
 .modal-overlay {
@@ -1074,6 +1127,10 @@ em-emoji-picker {
 @media (max-width: 767px) {
   .mood-calendar-months {
     grid-template-columns: 1fr;
+  }
+
+  .mood-calendar-months.year-view {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .full-calendar {

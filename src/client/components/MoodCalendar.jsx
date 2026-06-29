@@ -35,56 +35,87 @@ function MoodDayCell({ day, entry, passes, ...rest }) {
 
 export default function MoodCalendar({ moods, habitPasses, initialYear, initialMonth }) {
   const [{ year, month }, setYearMonth] = useState({ year: initialYear, month: initialMonth });
+  const [view, setView] = useState('3month');
+  const [yearViewYear, setYearViewYear] = useState(initialYear);
 
   function navigate(delta) {
-    setYearMonth(({ year: y, month: m }) => {
-      const d = new Date(y, m - 1 + delta);
-      return { year: d.getFullYear(), month: d.getMonth() + 1 };
-    });
+    if (view === 'year') {
+      setYearViewYear(y => y + delta);
+    } else {
+      setYearMonth(({ year: y, month: m }) => {
+        const d = new Date(y, m - 1 + delta * 3);
+        return { year: d.getFullYear(), month: d.getMonth() + 1 };
+      });
+    }
   }
 
   const moodMap = Object.fromEntries(
     (moods || []).filter(m => m.rating != null).map(m => [m.date, m.rating])
   );
 
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonthNum = now.getMonth() + 1;
+
+  function renderMonth(y, m, applyFutureFilter) {
+    const isFuture = applyFutureFilter &&
+      (y > currentYear || (y === currentYear && m > currentMonthNum));
+    const days = isFuture ? [] : buildMoodDays(y, m);
+    return (
+      <div key={`${y}-${m}`} className="mood-calendar-month">
+        <div className="mood-calendar-month-heading">
+          {MONTH_NAMES[m - 1]} {y}
+        </div>
+        <div className="calendar-grid">
+          {days.map(dateStr => {
+            const rating = moodMap[dateStr];
+            const entry = rating != null ? { rating } : undefined;
+            const passes = (habitPasses || []).filter(p => p.date === dateStr);
+            const day = parseInt(dateStr.split('-')[2], 10);
+            return (
+              <MoodDayCell
+                key={dateStr}
+                day={day}
+                entry={entry}
+                passes={passes}
+                data-testid={`mood-day-${dateStr}`}
+              />
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   // 3 months: oldest on left, most recent on right
-  const months = [-2, -1, 0].map(offset => offsetMonth(year, month, offset));
+  const threeMonths = [-2, -1, 0].map(offset => offsetMonth(year, month, offset));
+
+  // Year view: all 12 months of the selected year
+  const yearMonths = Array.from({ length: 12 }, (_, i) => ({
+    year: yearViewYear,
+    month: i + 1,
+  }));
 
   return (
     <div className="mood-calendar">
-      <div className="calendar-header">
-        <button onClick={() => navigate(-3)}>Previous</button>
-        <button onClick={() => navigate(3)}>Next</button>
+      <div className="mood-cal-header">
+        <button className="mood-cal-nav" aria-label="Previous" onClick={() => navigate(-1)}>‹</button>
+        <span className="mood-cal-title">{view === 'year' ? yearViewYear : '...'}</span>
+        <button className="mood-cal-nav" aria-label="Next" onClick={() => navigate(1)}>›</button>
+        <div className="mood-view-toggle">
+          <button className={view === '3month' ? 'active' : ''} onClick={() => setView('3month')}>3M</button>
+          <button className={view === 'year' ? 'active' : ''} onClick={() => setView('year')}>Year</button>
+        </div>
       </div>
-      <div className="mood-calendar-months">
-        {months.map(({ year: y, month: m }) => {
-          const days = buildMoodDays(y, m);
-          return (
-            <div key={`${y}-${m}`} className="mood-calendar-month">
-              <div className="mood-calendar-month-heading">
-                {MONTH_NAMES[m - 1]} {y}
-              </div>
-              <div className="calendar-grid">
-                {days.map(dateStr => {
-                  const rating = moodMap[dateStr];
-                  const entry = rating != null ? { rating } : undefined;
-                  const passes = (habitPasses || []).filter(p => p.date === dateStr);
-                  const day = parseInt(dateStr.split('-')[2], 10);
-                  return (
-                    <MoodDayCell
-                      key={dateStr}
-                      day={day}
-                      entry={entry}
-                      passes={passes}
-                      data-testid={`mood-day-${dateStr}`}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {view === '3month' ? (
+        <div className="mood-calendar-months">
+          {threeMonths.map(({ year: y, month: m }) => renderMonth(y, m, false))}
+        </div>
+      ) : (
+        <div className="mood-calendar-months year-view">
+          {yearMonths.map(({ year: y, month: m }) => renderMonth(y, m, true))}
+        </div>
+      )}
     </div>
   );
 }
