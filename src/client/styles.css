@@ -3,12 +3,12 @@
   --bg:             #1a1714;
   --surface:        #242019;
   --surface-raised: #2c2820;
-  --border:         #3a342c;
-  --border-strong:  #4a4338;
+  --border:         rgba(255,255,255,0.07);
+  --border-strong:  rgba(255,255,255,0.13);
 
-  --text-primary:   #f0ebe2;
-  --text-secondary: #9a9080;
-  --text-tertiary:  #6a6058;
+  --text-primary:   #F5F2EE;
+  --text-secondary: rgba(245,242,238,0.58);
+  --text-tertiary:  rgba(245,242,238,0.35);
 
   --sage:      #6fa882;
   --sage-dim:  #2a3d32;
@@ -160,10 +160,10 @@ input {
 }
 
 .board-heading {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   color: var(--text-tertiary);
   margin-bottom: 20px;
 }
@@ -242,13 +242,13 @@ input {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35);
   transition: all 0.2s;
 }
 
 .habit-card:hover {
   border-color: var(--border-strong);
-  box-shadow: var(--shadow);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   transform: translateY(-2px);
 }
 
@@ -291,7 +291,7 @@ input {
 .streak-number {
   font-size: 56px;
   font-weight: 800;
-  letter-spacing: -3px;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
   line-height: 1;
 }
@@ -300,9 +300,9 @@ input {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: var(--text-tertiary);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 /* ===== Habit actions (Done! / Skip / Fail) ===== */
@@ -324,44 +324,44 @@ input {
 }
 
 .habit-actions button:active {
-  transform: scale(0.97);
-  opacity: 0.9;
+  transform: scale(0.96);
+  transition: transform 80ms;
 }
 
 /* Done! */
 .habit-actions button:nth-child(1) {
-  background: var(--sage-dim);
-  color: var(--sage);
-  border: 1px solid rgba(111, 168, 130, 0.2);
+  background: rgba(111,168,130,0.14);
+  color: #7fa98b;
+  border: none;
 }
 
 .habit-actions button:nth-child(1):hover {
-  background: var(--sage);
-  color: #0d1f15;
+  background: #6fa882;
+  color: #091a10;
 }
 
 /* Skip */
 .habit-actions button:nth-child(2) {
-  background: var(--amber-dim);
-  color: var(--amber);
-  border: 1px solid rgba(196, 154, 90, 0.2);
+  background: rgba(196,154,90,0.14);
+  color: #c49a5a;
+  border: none;
 }
 
 .habit-actions button:nth-child(2):hover {
-  background: var(--amber);
-  color: #1f1505;
+  background: #c49a5a;
+  color: #1a1000;
 }
 
 /* Fail */
 .habit-actions button:nth-child(3) {
-  background: var(--rose-dim);
-  color: var(--rose);
-  border: 1px solid rgba(176, 104, 104, 0.2);
+  background: rgba(176,104,104,0.14);
+  color: #b06868;
+  border: none;
 }
 
 .habit-actions button:nth-child(3):hover {
-  background: var(--rose);
-  color: #1f0505;
+  background: #b06868;
+  color: #1a0505;
 }
 
 /* ===== Mini calendar ===== */
@@ -598,13 +598,14 @@ a.full-calendar-link {
   padding: 0 16px;
   font-size: 15px;
   color: var(--text-primary);
-  background: var(--surface);
+  background: var(--bg-inset, #141210);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .modal-input:focus {
-  border-color: var(--sage);
-  box-shadow: 0 0 0 3px rgba(111, 168, 130, 0.15);
+  border-color: rgba(111,168,130,0.6);
+  box-shadow: 0 0 0 3px rgba(111,168,130,0.12);
+  outline: none;
 }
 
 .modal-input::placeholder {
@@ -620,6 +621,16 @@ a.full-calendar-link {
 /* Emoji picker wrapper */
 .emoji-picker-wrap {
   margin-top: 16px;
+}
+
+/* ===== emoji-mart dark theme overrides ===== */
+em-emoji-picker {
+  --rgb-background: 42, 40, 36;
+  --rgb-input: 52, 50, 44;
+  --rgb-color: 245, 242, 238;
+  --border-radius: 12px;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  width: 100%;
 }
 
 /* Modal action buttons */
