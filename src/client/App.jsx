@@ -10,30 +10,31 @@ export default function App() {
   const [entries, setEntries] = useState([]);
   const [moods, setMoods] = useState([]);
   const [showMoodCalendar, setShowMoodCalendar] = useState(false);
+  const [isDesktop] = useState(() => window.innerWidth >= 768);
 
   const today = todayString();
-  const currentMonth = today.slice(0, 7); // YYYY-MM
-  const isDesktop = window.innerWidth >= 768;
+  const currentMonth = today.slice(0, 7);
 
   const fetchEntries = async () => {
-    const res = await fetch(`/api/entries?month=${currentMonth}`);
-    const data = await res.json();
+    const data = await fetch(`/api/entries?month=${currentMonth}`).then(r => r.json());
     setEntries(data);
+  };
+
+  const fetchMoods = async () => {
+    const data = await fetch(`/api/mood?month=${currentMonth}`).then(r => r.json());
+    setMoods(data);
   };
 
   useEffect(() => {
     const init = async () => {
-      const [habitsRes, moodRes] = await Promise.all([
-        fetch('/api/habits'),
-        fetch(`/api/mood?month=${currentMonth}`),
-      ]);
-      const [habitsData, moodData] = await Promise.all([
-        habitsRes.json(),
-        moodRes.json(),
+      const [habitsData, moodData, entriesData] = await Promise.all([
+        fetch('/api/habits').then(r => r.json()),
+        fetch(`/api/mood?month=${currentMonth}`).then(r => r.json()),
+        fetch(`/api/entries?month=${currentMonth}`).then(r => r.json()),
       ]);
       setHabits(habitsData);
       setMoods(moodData);
-      await fetchEntries();
+      setEntries(entriesData);
     };
     init();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -53,6 +54,7 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ date: today, rating }),
     });
+    await fetchMoods();
   };
 
   const todayMood = moods.find((m) => m.date === today && m.rating != null);
@@ -61,7 +63,7 @@ export default function App() {
     <div className="app">
       <MoodStrip
         currentRating={todayMood?.rating}
-        isEditable={true}
+        isEditable={!todayMood?.locked}
         onRatingChange={handleMoodChange}
       />
       {todayMood && (
