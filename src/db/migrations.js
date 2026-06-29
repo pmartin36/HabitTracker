@@ -1,8 +1,3 @@
-/**
- * runMigrations(db)
- * Accepts a better-sqlite3 Database instance and creates all required tables.
- * Safe to call multiple times (idempotent via CREATE TABLE IF NOT EXISTS).
- */
 export function runMigrations(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS habits (
@@ -15,12 +10,13 @@ export function runMigrations(db) {
 
     CREATE TABLE IF NOT EXISTS entries (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      habit_id   INTEGER NOT NULL,
+      habit_id   INTEGER NOT NULL REFERENCES habits(id),
       date       TEXT    NOT NULL,
       status     TEXT    NOT NULL DEFAULT 'pending'
                          CHECK (status IN ('pass', 'skip', 'fail', 'pending')),
       explicit   INTEGER NOT NULL DEFAULT 0,
-      updated_at TEXT    NOT NULL DEFAULT (datetime('now'))
+      updated_at TEXT    NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(habit_id, date)
     );
 
     CREATE TABLE IF NOT EXISTS daily_mood (

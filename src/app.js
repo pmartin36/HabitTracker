@@ -1,16 +1,14 @@
 import express from "express";
-import { createServer } from "http";
 
 const app = express();
+app.use(express.json());
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
 export function startServer(port) {
-  const server = createServer(app);
-  server.listen(port);
-  return server;
+  return app.listen(port);
 }
 
 export default app;
