@@ -1,0 +1,479 @@
+/* ===== Design tokens ===== */
+:root {
+  --color-pass:        #7eb89a;
+  --color-skip:        #c9956c;
+  --color-fail:        #b56b6b;
+  --color-pending-bg:  #ebebeb;
+  --color-pending-bdr: #c0bfbd;
+
+  --color-mood-1: #7eb89a;   /* sage – great */
+  --color-mood-2: #a8cba8;   /* light sage/yellow-green */
+  --color-mood-3: #c5bfb5;   /* neutral warm grey */
+  --color-mood-4: #c9956c;   /* soft amber */
+  --color-mood-5: #b56b6b;   /* muted red-grey – rough */
+  --color-mood-none: #f0efed;
+
+  --bg-app:   #f7f5f2;
+  --bg-card:  #ffffff;
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  --radius-card:   12px;
+  --radius-pill:   999px;
+
+  --text-primary:   #2c2c2c;
+  --text-secondary: #6e6e6e;
+  --text-muted:     #9e9e9e;
+
+  --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ===== Reset & base ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+/* ===== App shell ===== */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+/* ===== Mood strip ===== */
+.mood-strip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: var(--bg-app);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mood-strip.locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.mood-strip.locked .mood-icon {
+  cursor: not-allowed;
+}
+
+.mood-icon {
+  font-size: 1.5rem;
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  user-select: none;
+  line-height: 1;
+}
+
+.mood-icon:hover {
+  opacity: 0.75;
+}
+
+.mood-icon.active {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Mood calendar button */
+.app > button {
+  align-self: center;
+  margin: 0.5rem auto 0;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border: 1px solid var(--color-pending-bdr);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.app > button:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ===== Habit board — desktop (≥768px) ===== */
+.habit-board {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* "+" add-habit button inside board */
+.habit-board > button {
+  flex-shrink: 0;
+  align-self: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 1.5px dashed var(--color-pending-bdr);
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.habit-board > button:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+}
+
+/* ===== Habit card ===== */
+.habit-card {
+  flex-shrink: 0;
+  width: 220px;
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: background 0.35s ease;
+}
+
+/* Micro-interaction: card wash on Done! */
+@keyframes card-wash {
+  0%   { background: var(--bg-card); }
+  30%  { background: #d9ece3; }
+  100% { background: var(--bg-card); }
+}
+
+.habit-card.just-passed {
+  animation: card-wash 0.6s ease forwards;
+}
+
+.habit-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ===== Habit actions (Done!/Skip/Fail buttons) ===== */
+.habit-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.habit-actions button {
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: filter 0.12s ease, transform 0.1s ease;
+  color: #fff;
+}
+
+.habit-actions button:hover {
+  filter: brightness(1.08);
+}
+
+.habit-actions button:active {
+  transform: scale(0.96);
+}
+
+/* Done! button — sage green with bounce animation */
+@keyframes btn-bounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12); }
+  70%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+.habit-actions button:nth-child(1) {
+  background: var(--color-pass);
+}
+
+.habit-actions button:nth-child(1):active {
+  animation: btn-bounce 0.3s ease forwards;
+}
+
+/* Skip button — amber/clay */
+.habit-actions button:nth-child(2) {
+  background: var(--color-skip);
+}
+
+/* Fail button — muted red-grey */
+.habit-actions button:nth-child(3) {
+  background: var(--color-fail);
+}
+
+/* ===== Streak ===== */
+.streak {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.streak-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ===== Mini calendar ===== */
+.mini-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.mini-calendar .day {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  font-size: 0.62rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: opacity 0.1s;
+}
+
+.mini-calendar .day:hover {
+  opacity: 0.8;
+}
+
+/* ===== Full calendar ===== */
+.full-calendar {
+  max-width: 480px;
+  margin: 1rem auto;
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 1rem;
+}
+
+.full-calendar .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 0.75rem;
+}
+
+.full-calendar .day {
+  aspect-ratio: 1;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.1s;
+}
+
+.full-calendar .day:hover {
+  opacity: 0.8;
+}
+
+/* ===== Shared status classes (mini + full calendar) ===== */
+.status-pass {
+  background: var(--color-pass);
+  color: #fff;
+}
+
+.status-skip {
+  background: var(--color-skip);
+  color: #fff;
+}
+
+.status-fail {
+  background: var(--color-fail);
+  color: #fff;
+}
+
+.status-pending {
+  background: var(--color-pending-bg);
+  color: var(--text-secondary);
+  border: 1.5px dashed var(--color-pending-bdr);
+}
+
+/* ===== Mood calendar ===== */
+.mood-calendar {
+  max-width: 480px;
+  margin: 1rem auto;
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 1rem;
+}
+
+.mood-calendar .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 0.75rem;
+}
+
+.mood-calendar .calendar-grid > div {
+  aspect-ratio: 1;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  gap: 1px;
+  overflow: hidden;
+}
+
+/* Mood day cell classes */
+.mood-1    { background: var(--color-mood-1); }
+.mood-2    { background: var(--color-mood-2); }
+.mood-3    { background: var(--color-mood-3); }
+.mood-4    { background: var(--color-mood-4); }
+.mood-5    { background: var(--color-mood-5); }
+.mood-none { background: var(--color-mood-none); }
+
+/* ===== Calendar header (shared by full + mood calendars) ===== */
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar-header h2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.calendar-header button {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-pending-bdr);
+  transition: background 0.15s;
+}
+
+.calendar-header button:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ===== "Go to full calendar" link ===== */
+.full-calendar-link,
+a.full-calendar-link {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  display: block;
+  text-align: right;
+  transition: color 0.15s;
+}
+
+.full-calendar-link:hover {
+  color: var(--text-secondary);
+}
+
+/* ===== Mobile habit view (<768px) ===== */
+.mobile-habit-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.mobile-habit-view .habit-card {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Indicator dots */
+.indicator-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-pending-bdr);
+  transition: background 0.15s, transform 0.15s;
+}
+
+.indicator-dot.active {
+  background: var(--text-secondary);
+  transform: scale(1.25);
+}
+
+/* Navigation buttons in mobile view */
+.navigation {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.navigation button {
+  padding: 0.35rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-pending-bdr);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  transition: background 0.15s;
+}
+
+.navigation button:not(:disabled):hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ===== Responsive overrides ===== */
+@media (max-width: 767px) {
+  .habit-board {
+    flex-direction: column;
+    align-items: stretch;
+    overflow-x: visible;
+    padding: 0.75rem;
+  }
+
+  .habit-card {
+    width: 100%;
+  }
+}
