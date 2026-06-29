@@ -1,7 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import FullCalendar from './FullCalendar.jsx';
 
 export default function CalendarModal({ habit, entries, onStatusChange, onClose, currentYear, currentMonth }) {
+  // Seed with entries already in memory (current month), then fetch full history
+  const [allEntries, setAllEntries] = useState(entries.filter(e => e.habit_id === habit.id));
+
+  useEffect(() => {
+    fetch(`/api/entries/${habit.id}`)
+      .then(r => r.json())
+      .then(data => setAllEntries(data))
+      .catch(() => {}); // fall back to in-memory entries on error
+  }, [habit.id]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -13,8 +23,6 @@ export default function CalendarModal({ habit, entries, onStatusChange, onClose,
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
-
-  const habitEntries = entries.filter(e => e.habit_id === habit.id);
 
   return (
     <div className="calendar-modal-overlay" onClick={handleOverlayClick}>
@@ -31,10 +39,11 @@ export default function CalendarModal({ habit, entries, onStatusChange, onClose,
         </div>
         <FullCalendar
           habitId={habit.id}
-          entries={habitEntries}
+          entries={allEntries}
           onStatusChange={(date, status) => onStatusChange(habit.id, date, status)}
           initialYear={currentYear}
           initialMonth={currentMonth}
+          createdAt={habit.created_at}
         />
       </div>
     </div>

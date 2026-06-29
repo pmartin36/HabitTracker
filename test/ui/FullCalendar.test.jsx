@@ -4,17 +4,13 @@ import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
 import FullCalendar from '../../src/client/components/FullCalendar.jsx';
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
-
 function renderCalendar({
   habitId = 1,
   entries = [],
   onStatusChange = vi.fn(),
   initialYear = 2024,
   initialMonth = 1,
+  createdAt = undefined,
 } = {}) {
   return render(
     <FullCalendar
@@ -23,63 +19,44 @@ function renderCalendar({
       onStatusChange={onStatusChange}
       initialYear={initialYear}
       initialMonth={initialMonth}
+      createdAt={createdAt}
     />
   );
 }
 
 describe('FullCalendar', () => {
-  it('renders the month and year as a heading', () => {
+  it('renders a month heading for the current month', () => {
     renderCalendar({ initialYear: 2024, initialMonth: 1 });
     expect(screen.getByText(/January\s+2024/)).toBeInTheDocument();
   });
 
-  it('renders a "Previous" navigation button', () => {
-    renderCalendar();
-    expect(screen.getByRole('button', { name: /previous/i })).toBeInTheDocument();
-  });
-
-  it('renders a "Next" navigation button', () => {
-    renderCalendar();
-    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
-  });
-
-  it('clicking "Next" advances the heading to the next month', async () => {
-    const user = userEvent.setup();
-    renderCalendar({ initialYear: 2024, initialMonth: 1 });
-    await user.click(screen.getByRole('button', { name: /next/i }));
+  it('renders month headings for all months from createdAt to initialMonth', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 3, createdAt: '2024-01-15' });
+    expect(screen.getByText(/January\s+2024/)).toBeInTheDocument();
     expect(screen.getByText(/February\s+2024/)).toBeInTheDocument();
+    expect(screen.getByText(/March\s+2024/)).toBeInTheDocument();
   });
 
-  it('clicking "Previous" moves the heading back one month', async () => {
-    const user = userEvent.setup();
-    renderCalendar({ initialYear: 2024, initialMonth: 3 });
-    await user.click(screen.getByRole('button', { name: /previous/i }));
-    expect(screen.getByText(/February\s+2024/)).toBeInTheDocument();
+  it('renders a month heading for a month in the past when createdAt is earlier', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 6, createdAt: '2024-03-01' });
+    expect(screen.getByText(/March\s+2024/)).toBeInTheDocument();
   });
 
-  it('navigating forward across a year boundary wraps to January of the next year', async () => {
-    const user = userEvent.setup();
-    renderCalendar({ initialYear: 2024, initialMonth: 12 });
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    expect(screen.getByText(/January\s+2025/)).toBeInTheDocument();
+  it('most recent month is rendered first (appears before earlier months)', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 3, createdAt: '2024-01-01' });
+    const headings = screen.getAllByText(/\b(January|February|March)\s+2024/);
+    expect(headings[0].textContent).toMatch(/March/);
+    expect(headings[headings.length - 1].textContent).toMatch(/January/);
   });
 
-  it('navigating backward across a year boundary wraps to December of the previous year', async () => {
-    const user = userEvent.setup();
-    renderCalendar({ initialYear: 2024, initialMonth: 1 });
-    await user.click(screen.getByRole('button', { name: /previous/i }));
-    expect(screen.getByText(/December\s+2023/)).toBeInTheDocument();
+  it('does not render a "Previous" navigation button', () => {
+    renderCalendar();
+    expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument();
   });
 
-  it('multiple consecutive "Next" clicks advance through months correctly', async () => {
-    const user = userEvent.setup();
-    renderCalendar({ initialYear: 2024, initialMonth: 10 });
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    expect(screen.getByText(/November\s+2024/)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    expect(screen.getByText(/December\s+2024/)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    expect(screen.getByText(/January\s+2025/)).toBeInTheDocument();
+  it('does not render a "Next" navigation button', () => {
+    renderCalendar();
+    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument();
   });
 
   it('day cells carry status-pass class for pass entries', () => {
@@ -115,22 +92,31 @@ describe('FullCalendar', () => {
     expect(onStatusChange).toHaveBeenCalledWith('2024-01-05', 'skip');
   });
 
-  it('day cells on the new month are visible after navigation', async () => {
-    const user = userEvent.setup();
-    renderCalendar({ initialYear: 2024, initialMonth: 1 });
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    // February 2024 day cells should now be present
+  it('day cells are rendered for every day in the month', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 2 }); // Feb 2024 has 29 days (leap year)
     expect(screen.getByTestId('day-2024-02-01')).toBeInTheDocument();
+    expect(screen.getByTestId('day-2024-02-29')).toBeInTheDocument();
   });
 
-  it('day cells from the previous month are no longer present after navigation', async () => {
-    const user = userEvent.setup();
-    renderCalendar({ initialYear: 2024, initialMonth: 1 });
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    // January cells should be gone (or outside-class)
-    const jan31 = screen.queryByTestId('day-2024-01-31');
-    if (jan31 !== null) {
-      expect(jan31).toHaveClass('day-outside');
-    }
+  it('entries from multiple months are shown when createdAt spans months', () => {
+    const entries = [
+      { date: '2024-01-05', status: 'pass' },
+      { date: '2024-02-10', status: 'fail' },
+    ];
+    renderCalendar({ initialYear: 2024, initialMonth: 2, createdAt: '2024-01-01', entries });
+    expect(screen.getByTestId('day-2024-01-05')).toHaveClass('status-pass');
+    expect(screen.getByTestId('day-2024-02-10')).toHaveClass('status-fail');
+  });
+
+  it('without createdAt, only the initialYear/initialMonth is rendered', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 6 });
+    expect(screen.getByText(/June\s+2024/)).toBeInTheDocument();
+    expect(screen.queryByText(/May\s+2024/)).not.toBeInTheDocument();
+  });
+
+  it('pending days default to status-pending when no entry exists', () => {
+    renderCalendar({ initialYear: 2024, initialMonth: 1, entries: [] });
+    // Day 15 has no entry, should be status-pending
+    expect(screen.getByTestId('day-2024-01-15')).toHaveClass('status-pending');
   });
 });

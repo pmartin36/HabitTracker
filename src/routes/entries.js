@@ -19,6 +19,7 @@ export default function entriesRouter(db) {
   const getEntry        = db.prepare('SELECT * FROM entries WHERE habit_id = ? AND date = ?');
   const getByMonth      = db.prepare("SELECT * FROM entries WHERE habit_id = ? AND date LIKE ?");
   const getAllByMonth    = db.prepare("SELECT * FROM entries WHERE date LIKE ? ORDER BY date");
+  const getAllForHabit   = db.prepare("SELECT * FROM entries WHERE habit_id = ? ORDER BY date");
 
   router.post('/', (req, res) => {
     const { habit_id, date, status } = req.body ?? {};
@@ -46,7 +47,11 @@ export default function entriesRouter(db) {
   router.get('/:habit_id', (req, res) => {
     const { habit_id } = req.params;
     const { month } = req.query;
-    res.json(getByMonth.all(habit_id, `${month}-%`));
+    if (month) {
+      res.json(getByMonth.all(habit_id, `${month}-%`));
+    } else {
+      res.json(getAllForHabit.all(habit_id));
+    }
   });
 
   return router;
