@@ -108,10 +108,14 @@ describe('FullCalendar', () => {
     expect(screen.getByTestId('day-2024-02-10')).toHaveClass('status-fail');
   });
 
-  it('without createdAt, only the initialYear/initialMonth is rendered', () => {
+  it('without createdAt, renders at least 12 months back from initialMonth', () => {
+    // June 2024 → 12 months back = July 2023; May 2024 and July 2023 must appear
     renderCalendar({ initialYear: 2024, initialMonth: 6 });
     expect(screen.getByText(/June\s+2024/)).toBeInTheDocument();
-    expect(screen.queryByText(/May\s+2024/)).not.toBeInTheDocument();
+    expect(screen.getByText(/May\s+2024/)).toBeInTheDocument();
+    expect(screen.getByText(/July\s+2023/)).toBeInTheDocument();
+    // June 2023 is outside the 12-month window
+    expect(screen.queryByText(/June\s+2023/)).not.toBeInTheDocument();
   });
 
   it('pending days default to status-pending when no entry exists', () => {

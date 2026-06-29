@@ -123,17 +123,17 @@ export default function App() {
           showingCalendar={showMoodCalendar}
           onToggleCalendar={() => setShowMoodCalendar((v) => !v)}
         />
-        {showMoodCalendar && todayMood && (
-          <div className="mood-calendar-panel">
-            <MoodCalendar
-              moods={moods}
-              habitPasses={habitPasses}
-              initialYear={currentYear}
-              initialMonth={currentMonthNum}
-            />
-          </div>
-        )}
       </div>
+      {showMoodCalendar && todayMood && (
+        <div className="mood-calendar-panel">
+          <MoodCalendar
+            moods={moods}
+            habitPasses={habitPasses}
+            initialYear={currentYear}
+            initialMonth={currentMonthNum}
+          />
+        </div>
+      )}
       {isDesktop ? (
         <HabitBoard
           habits={habits}

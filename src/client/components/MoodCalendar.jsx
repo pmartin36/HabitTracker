@@ -34,8 +34,8 @@ export default function MoodCalendar({ moods, habitPasses, initialYear, initialM
     return acc;
   }, {});
 
-  // 3 months: most recent first, going back 2
-  const months = [0, -1, -2].map(offset => offsetMonth(year, month, offset));
+  // 3 months: oldest on left, most recent on right
+  const months = [-2, -1, 0].map(offset => offsetMonth(year, month, offset));
 
   return (
     <div className="mood-calendar">

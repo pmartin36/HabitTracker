@@ -5,30 +5,24 @@ import { MONTH_NAMES, formatDate, daysInMonth } from '../utils/date.js';
 const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function generateMonths(createdAt, initialYear, initialMonth) {
+  // Always go back at least 12 months
+  const twelveMonthsAgo = new Date(initialYear, initialMonth - 1 - 11, 1);
+  const createdDate = createdAt ? new Date(createdAt) : twelveMonthsAgo;
+  const startDate = createdDate < twelveMonthsAgo ? createdDate : twelveMonthsAgo;
+
   const months = [];
+  let y = initialYear;
+  let m = initialMonth;
 
-  let startYear, startMonth;
-  if (createdAt) {
-    startYear = parseInt(createdAt.slice(0, 4), 10);
-    startMonth = parseInt(createdAt.slice(5, 7), 10);
-  } else {
-    startYear = initialYear;
-    startMonth = initialMonth;
+  while (
+    y > startDate.getFullYear() ||
+    (y === startDate.getFullYear() && m >= startDate.getMonth() + 1)
+  ) {
+    months.push({ year: y, month: m });
+    m--;
+    if (m === 0) { m = 12; y--; }
   }
-
-  let year = initialYear;
-  let month = initialMonth;
-
-  while (year > startYear || (year === startYear && month >= startMonth)) {
-    months.push({ year, month });
-    month--;
-    if (month === 0) {
-      month = 12;
-      year--;
-    }
-  }
-
-  return months; // most recent first
+  return months; // already newest-first; rendered top-to-bottom
 }
 
 export default function FullCalendar({ entries, onStatusChange, initialYear, initialMonth, createdAt }) {
