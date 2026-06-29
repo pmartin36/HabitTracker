@@ -41,7 +41,7 @@ vi.mock('../../src/client/components/MobileHabitView.jsx', () => ({
 }));
 
 vi.mock('../../src/client/components/MoodStrip.jsx', () => ({
-  default: ({ onRatingChange }) => (
+  default: ({ onRatingChange, showCalendarButton, showingCalendar, onToggleCalendar }) => (
     <div data-testid="mood-strip">
       <button
         data-testid="mood-icon-3"
@@ -49,6 +49,11 @@ vi.mock('../../src/client/components/MoodStrip.jsx', () => ({
       >
         😐
       </button>
+      {showCalendarButton && (
+        <button onClick={onToggleCalendar}>
+          {showingCalendar ? 'Hide Mood Calendar' : 'Mood Calendar'}
+        </button>
+      )}
     </div>
   ),
 }));
@@ -62,7 +67,8 @@ vi.mock('../../src/client/components/MoodCalendar.jsx', () => ({
 // POST calls always succeed. GET calls return the supplied fixtures.
 function makeFetchMock({ habits = SAMPLE_HABITS, entries = [], mood = [] } = {}) {
   return vi.fn((url, options = {}) => {
-    if (options.method === 'POST') {
+    const method = options.method ?? 'GET';
+    if (method === 'POST' || method === 'PATCH' || method === 'DELETE') {
       return Promise.resolve({ ok: true, json: async () => ({}) });
     }
     if (url.includes('/api/habits')) {

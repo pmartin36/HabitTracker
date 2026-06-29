@@ -78,27 +78,24 @@ input {
 
 /* ===== Mood strip ===== */
 .mood-strip {
-  position: sticky;
-  top: 0;
-  z-index: 50;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 12px;
-  padding: 16px 24px;
-  background: rgba(17, 17, 19, 0.9);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  justify-content: space-between;
 }
 
-.mood-strip::before {
-  content: 'How are you feeling?';
-  font-size: 12px;
+.mood-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.mood-label {
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   color: var(--text-tertiary);
-  margin-right: 8px;
+  margin-right: 12px;
   white-space: nowrap;
 }
 
@@ -137,33 +134,39 @@ input {
 
 /* Mood strip container */
 .mood-strip-container {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(17, 17, 19, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
   margin-bottom: 32px;
 }
 
 /* Mood Calendar toggle button */
-.mood-cal-toggle {
-  display: block;
-  margin: 12px auto 0;
-  padding: 6px 16px;
-  font-size: 12px;
-  font-weight: 500;
+.mood-calendar-toggle {
+  font-size: 13px;
   color: var(--text-tertiary);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: transparent;
-  transition: background 0.15s, color 0.15s;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-}
-
-.mood-cal-toggle:hover {
   background: var(--surface);
-  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-/* Mood calendar section (full-width below board) */
-.mood-calendar-section {
-  margin-top: 32px;
+.mood-calendar-toggle:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+/* Mood calendar accordion panel */
+.mood-calendar-panel {
+  padding: 20px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
 }
 
 /* ===== Board section heading ===== */
@@ -276,18 +279,39 @@ input {
 }
 
 /* Card header */
-.habit-name {
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--text-primary);
+.card-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .habit-emoji {
   font-size: 20px;
   line-height: 1;
+}
+
+.habit-name {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.habit-card:hover .edit-btn {
+  opacity: 1;
 }
 
 /* ===== Streak ===== */
@@ -300,12 +324,31 @@ input {
   border-bottom: 1px solid var(--border);
 }
 
+.streak-number-wrap {
+  overflow: hidden;
+  line-height: 1;
+}
+
+@keyframes roll-up {
+  0%   { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes roll-down {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  100% { transform: translateY(0);     opacity: 1; }
+}
+
+.streak-roll-up .streak-number   { animation: roll-up   0.3s cubic-bezier(0.22,1,0.36,1); }
+.streak-roll-down .streak-number { animation: roll-down 0.2s cubic-bezier(0.22,1,0.36,1); }
+
 .streak-number {
   font-size: 56px;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--text-primary);
   line-height: 1;
+  display: block;
 }
 
 .streak-label {
@@ -481,6 +524,136 @@ a.full-calendar-link {
 
 .full-calendar-link:hover {
   color: var(--text-secondary);
+}
+
+/* Full Calendar button inside habit card */
+.full-cal-link {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+
+.full-cal-link:hover {
+  color: var(--text-secondary);
+}
+
+/* ===== Calendar Modal ===== */
+.calendar-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.calendar-modal {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+}
+
+.calendar-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendar-modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.modal-close-btn:hover {
+  color: var(--text-primary);
+}
+
+/* ===== Edit/Delete section in EditHabitModal ===== */
+.edit-delete-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: rgba(176, 104, 104, 0.6);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.delete-btn:hover {
+  color: var(--rose);
+}
+
+.delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.delete-confirm-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.delete-confirm-yes {
+  background: var(--rose-dim);
+  border: 1px solid var(--rose);
+  color: var(--rose);
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.delete-confirm-yes:hover {
+  background: var(--rose);
+  color: #1a0505;
+}
+
+.delete-confirm-cancel {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.15s;
 }
 
 /* ===== Calendar header (shared by full + mood calendars) ===== */

@@ -2,9 +2,20 @@ import React, { useState } from 'react';
 import { todayString } from '../utils/date.js';
 import HabitActions from './HabitActions.jsx';
 import MiniCalendar from './MiniCalendar.jsx';
+import AnimatedStreak from './AnimatedStreak.jsx';
+import EditHabitModal from './EditHabitModal.jsx';
 
-export default function MobileHabitView({ habits, entries, onStatusChange, onAddHabit, streaks = {} }) {
+export default function MobileHabitView({
+  habits,
+  entries,
+  onStatusChange,
+  onAddHabit,
+  streaks = {},
+  onEditHabit = () => {},
+  onDeleteHabit = () => {},
+}) {
   const [index, setIndex] = useState(0);
+  const [editingHabit, setEditingHabit] = useState(null);
   const today = todayString();
   const currentYear = parseInt(today.slice(0, 4), 10);
   const currentMonth = parseInt(today.slice(5, 7), 10);
@@ -33,20 +44,24 @@ export default function MobileHabitView({ habits, entries, onStatusChange, onAdd
   return (
     <div className="mobile-habit-view">
       <div className="habit-card">
-        <span className="habit-name">
-          {habit.emoji && <span className="habit-emoji">{habit.emoji} </span>}
-          {habit.name}
-        </span>
+        <div className="card-header">
+          <span className="habit-emoji">{habit.emoji}</span>
+          <span className="habit-name">{habit.name}</span>
+          <button
+            className="edit-btn"
+            onClick={() => setEditingHabit(habit)}
+            aria-label={`Edit ${habit.name}`}
+          >
+            ✎
+          </button>
+        </div>
         <HabitActions
           habitId={habit.id}
           date={today}
           onStatusChange={onStatusChange}
           currentStatus={currentStatus}
         />
-        <div className="streak">
-          <span className="streak-number">{streaks[habit.id] ?? 0}</span>
-          <span className="streak-label">day streak</span>
-        </div>
+        <AnimatedStreak value={streaks[habit.id] ?? 0} />
         <div data-testid={`mini-calendar-${habit.id}`}>
           <MiniCalendar
             habitId={habit.id}
@@ -88,6 +103,20 @@ export default function MobileHabitView({ habits, entries, onStatusChange, onAdd
         <button className="add-habit-btn mobile-add" onClick={onAddHabit} aria-label="Add habit">
           +
         </button>
+      )}
+      {editingHabit && (
+        <EditHabitModal
+          habit={editingHabit}
+          onSave={(id, name, emoji) => {
+            onEditHabit(id, name, emoji);
+            setEditingHabit(null);
+          }}
+          onDelete={(id) => {
+            onDeleteHabit(id);
+            setEditingHabit(null);
+          }}
+          onClose={() => setEditingHabit(null)}
+        />
       )}
     </div>
   );

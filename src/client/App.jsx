@@ -75,6 +75,22 @@ export default function App() {
     await fetchMoods();
   };
 
+  const handleEditHabit = async (id, name, emoji) => {
+    await fetch(`/api/habits/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, emoji }),
+    });
+    await fetchHabits();
+  };
+
+  const handleDeleteHabit = async (id) => {
+    await fetch(`/api/habits/${id}`, {
+      method: 'DELETE',
+    });
+    await fetchHabits();
+  };
+
   const onAddHabit = () => setShowAddModal(true);
 
   const handleAddHabitSubmit = async (name, emoji) => {
@@ -103,11 +119,19 @@ export default function App() {
           currentRating={todayMood?.rating}
           isEditable={!todayMood?.locked}
           onRatingChange={handleMoodChange}
+          showCalendarButton={!!todayMood}
+          showingCalendar={showMoodCalendar}
+          onToggleCalendar={() => setShowMoodCalendar((v) => !v)}
         />
-        {todayMood && (
-          <button className="mood-cal-toggle" onClick={() => setShowMoodCalendar((v) => !v)}>
-            {showMoodCalendar ? 'Hide Mood Calendar' : 'Mood Calendar'}
-          </button>
+        {showMoodCalendar && todayMood && (
+          <div className="mood-calendar-panel">
+            <MoodCalendar
+              moods={moods}
+              habitPasses={habitPasses}
+              initialYear={currentYear}
+              initialMonth={currentMonthNum}
+            />
+          </div>
         )}
       </div>
       {isDesktop ? (
@@ -117,6 +141,8 @@ export default function App() {
           onStatusChange={handleStatusChange}
           onAddHabit={onAddHabit}
           streaks={streaks}
+          onEditHabit={handleEditHabit}
+          onDeleteHabit={handleDeleteHabit}
           currentYear={currentYear}
           currentMonth={currentMonthNum}
         />
@@ -127,19 +153,11 @@ export default function App() {
           onStatusChange={handleStatusChange}
           onAddHabit={onAddHabit}
           streaks={streaks}
+          onEditHabit={handleEditHabit}
+          onDeleteHabit={handleDeleteHabit}
           currentYear={currentYear}
           currentMonth={currentMonthNum}
         />
-      )}
-      {showMoodCalendar && (
-        <div className="mood-calendar-section">
-          <MoodCalendar
-            moods={moods}
-            habitPasses={habitPasses}
-            initialYear={currentYear}
-            initialMonth={currentMonthNum}
-          />
-        </div>
       )}
       {showAddModal && (
         <AddHabitModal
