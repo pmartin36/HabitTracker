@@ -160,6 +160,59 @@ describe("Entries API", () => {
     );
   });
 
+  // ── DELETE /api/entries ──────────────────────────────────────────────────────
+
+  describe("DELETE /api/entries", () => {
+    it("returns 200 with {deleted: true} when an entry exists", async () => {
+      db.prepare(
+        "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+      ).run(habitId, "2024-01-01", "fail", 1);
+
+      const res = await request(app)
+        .delete("/api/entries")
+        .send({ habit_id: habitId, date: "2024-01-01" });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ deleted: true });
+    });
+
+    it("removes the entry from the database", async () => {
+      db.prepare(
+        "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+      ).run(habitId, "2024-01-01", "fail", 1);
+
+      await request(app)
+        .delete("/api/entries")
+        .send({ habit_id: habitId, date: "2024-01-01" });
+
+      const row = db
+        .prepare("SELECT * FROM entries WHERE habit_id = ? AND date = ?")
+        .get(habitId, "2024-01-01");
+      expect(row).toBeUndefined();
+    });
+
+    it("returns 200 with {deleted: true} even when no matching entry exists (idempotent)", async () => {
+      const res = await request(app)
+        .delete("/api/entries")
+        .send({ habit_id: habitId, date: "2024-01-01" });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ deleted: true });
+    });
+
+    it("returns 400 when habit_id is missing", async () => {
+      const res = await request(app)
+        .delete("/api/entries")
+        .send({ date: "2024-01-01" });
+      expect(res.status).toBe(400);
+    });
+
+    it("returns 400 when date is missing", async () => {
+      const res = await request(app)
+        .delete("/api/entries")
+        .send({ habit_id: habitId });
+      expect(res.status).toBe(400);
+    });
+  });
+
   // ── GET /api/entries?month=YYYY-MM (all habits) ──────────────────────────────
 
   describe("GET /api/entries?month=YYYY-MM (all habits)", () => {

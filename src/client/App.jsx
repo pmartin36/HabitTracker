@@ -57,11 +57,19 @@ export default function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleStatusChange = async (habitId, date, status) => {
-    await fetch('/api/entries', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ habit_id: habitId, date, status }),
-    });
+    if (status === 'pending') {
+      await fetch('/api/entries', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ habit_id: habitId, date }),
+      });
+    } else {
+      await fetch('/api/entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ habit_id: habitId, date, status }),
+      });
+    }
     await fetchEntries();
     await fetchStreaks();
   };

@@ -39,6 +39,13 @@ export default function entriesRouter(db) {
     res.json({ entry, streak });
   });
 
+  router.delete('/', (req, res) => {
+    const { habit_id, date } = req.body ?? {};
+    if (!habit_id || !date) return res.status(400).json({ error: 'habit_id and date required' });
+    db.prepare('DELETE FROM entries WHERE habit_id = ? AND date = ?').run(habit_id, date);
+    res.json({ deleted: true });
+  });
+
   router.get('/', (req, res) => {
     const { month } = req.query;
     res.json(getAllByMonth.all(`${month}-%`));
