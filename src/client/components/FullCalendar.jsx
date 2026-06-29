@@ -5,10 +5,10 @@ import { MONTH_NAMES, formatDate, daysInMonth } from '../utils/date.js';
 const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function generateMonths(createdAt, initialYear, initialMonth) {
-  // Always go back at least 12 months
-  const twelveMonthsAgo = new Date(initialYear, initialMonth - 1 - 11, 1);
-  const createdDate = createdAt ? new Date(createdAt) : twelveMonthsAgo;
-  const startDate = createdDate < twelveMonthsAgo ? createdDate : twelveMonthsAgo;
+  // Always show from January 1st of the current year (or createdAt if earlier)
+  const janFirst = new Date(initialYear, 0, 1);
+  const createdDate = createdAt ? new Date(createdAt) : janFirst;
+  const startDate = createdDate < janFirst ? createdDate : janFirst;
 
   const months = [];
   let y = initialYear;
