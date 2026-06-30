@@ -80,14 +80,27 @@ input {
 .mood-strip {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
-.mood-strip-row {
+.mood-strip-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+.mood-strip-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* legacy — kept for safety */
+.mood-strip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
 .mood-icons {
   display: flex;
@@ -1447,5 +1460,73 @@ em-emoji-picker {
 
   .habit-board > button {
     width: 100%;
+  }
+
+  /* ── Mood strip mobile ── */
+  .mood-strip-container {
+    padding: 10px 16px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* ── Mobile habit card readability ── */
+  .mobile-habit-view {
+    padding: 16px;
+  }
+
+  .mobile-habit-view .habit-card {
+    max-width: 100%;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .habit-name {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .streak {
+    padding: 20px 0;
+  }
+
+  .streak-label {
+    text-align: center;
+  }
+
+  .habit-actions button {
+    font-size: 15px;
+    height: 44px;
+  }
+
+  /* ── Navigation dots ── */
+  .indicator-dots {
+    padding: 20px 0;
+  }
+
+  .indicator-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .indicator-dot.active {
+    width: 28px;
+    height: 8px;
+    border-radius: 4px;
+  }
+
+  /* ── Full Calendar link ── */
+  .full-cal-link {
+    font-size: 13px;
+    text-align: center;
+    display: block;
+    padding: 4px 0 8px;
+  }
+
+  /* ── Add habit button (mobile card view) ── */
+  .add-habit-btn.mobile-add {
+    width: 100%;
+    height: 64px;
+    border-radius: var(--radius);
+    font-size: 32px;
   }
 }
