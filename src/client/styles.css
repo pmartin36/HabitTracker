@@ -1627,6 +1627,15 @@ em-emoji-picker {
     overflow: hidden;
   }
 
+  .mood-calendar .calendar-grid {
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .mood-day {
+    min-height: 0;
+  }
+
   .mood-day-num {
     font-size: 10px;
   }
