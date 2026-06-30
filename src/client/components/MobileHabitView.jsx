@@ -18,6 +18,7 @@ export default function MobileHabitView({
   const [index, setIndex] = useState(0);
   const [editingHabit, setEditingHabit] = useState(null);
   const [calendarHabit, setCalendarHabit] = useState(null);
+  const [touchStartX, setTouchStartX] = useState(null);
   const today = todayString();
   const currentYear = parseInt(today.slice(0, 4), 10);
   const currentMonth = parseInt(today.slice(5, 7), 10);
@@ -35,80 +36,72 @@ export default function MobileHabitView({
     );
   }
 
-  const habit = habits[index];
-  const isFirst = index === 0;
-  const isLast = index === habits.length - 1;
+  const hasAddSlot = habits.length < 5;
+  const totalSlots = habits.length + (hasAddSlot ? 1 : 0);
+  const isAddSlot = index === habits.length && hasAddSlot;
 
-  const habitEntries = entries.filter(e => e.habit_id === habit.id);
-  const todayEntry = habitEntries.find(e => e.date === today);
+  const habit = !isAddSlot ? habits[index] : null;
+  const habitEntries = habit ? entries.filter(e => e.habit_id === habit.id) : [];
+  const todayEntry = habit ? habitEntries.find(e => e.date === today) : null;
   const currentStatus = todayEntry?.status;
 
   return (
-    <div className="mobile-habit-view">
-      <div className="habit-card">
-        <div className="card-header">
-          <span className="habit-emoji">{habit.emoji}</span>
-          <span className="habit-name">{habit.name}</span>
-          <button
-            className="edit-btn"
-            onClick={() => setEditingHabit(habit)}
-            aria-label={`Edit ${habit.name}`}
-          >
-            ✎
+    <div
+      className="mobile-habit-view"
+      onTouchStart={e => setTouchStartX(e.touches[0].clientX)}
+      onTouchEnd={e => {
+        if (touchStartX === null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        setTouchStartX(null);
+        if (Math.abs(dx) < 50) return;
+        if (dx < 0) setIndex(i => (i + 1) % totalSlots);
+        else        setIndex(i => (i - 1 + totalSlots) % totalSlots);
+      }}
+    >
+      {isAddSlot ? (
+        <div className="mobile-add-card" onClick={onAddHabit}>
+          <span className="mobile-add-icon">+</span>
+          <span className="mobile-add-label">Add habit</span>
+        </div>
+      ) : (
+        <div className="habit-card">
+          <div className="card-header">
+            <span className="habit-emoji">{habit.emoji}</span>
+            <span className="habit-name">{habit.name}</span>
+            <button
+              className="edit-btn"
+              onClick={() => setEditingHabit(habit)}
+              aria-label={`Edit ${habit.name}`}
+            >
+              ✎
+            </button>
+          </div>
+          <HabitActions
+            habitId={habit.id}
+            date={today}
+            onStatusChange={onStatusChange}
+            currentStatus={currentStatus}
+          />
+          <AnimatedStreak key={habit.id} value={streaks[habit.id] ?? 0} />
+          <div data-testid={`mini-calendar-${habit.id}`}>
+            <MiniCalendar
+              habitId={habit.id}
+              entries={habitEntries}
+              onStatusChange={(date, status) => onStatusChange(habit.id, date, status)}
+              year={currentYear}
+              month={currentMonth}
+            />
+          </div>
+          <button className="full-cal-link" onClick={() => setCalendarHabit(habit)}>
+            Full Calendar →
           </button>
         </div>
-        <HabitActions
-          habitId={habit.id}
-          date={today}
-          onStatusChange={onStatusChange}
-          currentStatus={currentStatus}
-        />
-        <AnimatedStreak value={streaks[habit.id] ?? 0} />
-        <div data-testid={`mini-calendar-${habit.id}`}>
-          <MiniCalendar
-            habitId={habit.id}
-            entries={habitEntries}
-            onStatusChange={(date, status) => onStatusChange(habit.id, date, status)}
-            year={currentYear}
-            month={currentMonth}
-          />
-        </div>
-        <button className="full-cal-link" onClick={() => setCalendarHabit(habit)}>
-          Full Calendar →
-        </button>
-      </div>
+      )}
       <div className="indicator-dots">
-        {habits.map((h, i) => (
-          <span
-            key={h.id}
-            data-testid={`indicator-dot-${i}`}
-            className={`indicator-dot${i === index ? ' active' : ''}`}
-          />
+        {Array.from({ length: totalSlots }, (_, i) => (
+          <span key={i} data-testid={`indicator-dot-${i}`} className={`indicator-dot${i === index ? ' active' : ''}`} />
         ))}
       </div>
-      <div className="navigation">
-        <button
-          aria-label="Previous"
-          className="nav-btn"
-          onClick={() => setIndex(i => i - 1)}
-          disabled={isFirst}
-        >
-          ‹
-        </button>
-        <button
-          aria-label="Next"
-          className="nav-btn"
-          onClick={() => setIndex(i => i + 1)}
-          disabled={isLast}
-        >
-          ›
-        </button>
-      </div>
-      {habits.length < 5 && onAddHabit && (
-        <button className="add-habit-btn mobile-add" onClick={onAddHabit} aria-label="Add habit">
-          +
-        </button>
-      )}
       {editingHabit && (
         <EditHabitModal
           habit={editingHabit}

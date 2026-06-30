@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
@@ -13,16 +13,28 @@ const HABITS = [
   { id: 3, name: 'Meditate', emoji: '🧘', sort_order: 3 },
 ];
 
+function swipeLeft(el) {
+  fireEvent.touchStart(el, { touches: [{ clientX: 300 }] });
+  fireEvent.touchEnd(el, { changedTouches: [{ clientX: 200 }] });
+}
+
+function swipeRight(el) {
+  fireEvent.touchStart(el, { touches: [{ clientX: 200 }] });
+  fireEvent.touchEnd(el, { changedTouches: [{ clientX: 300 }] });
+}
+
 function renderView({
   habits = HABITS,
   entries = [],
   onStatusChange = vi.fn(),
+  onAddHabit,
 } = {}) {
   return render(
     <MobileHabitView
       habits={habits}
       entries={entries}
       onStatusChange={onStatusChange}
+      onAddHabit={onAddHabit}
     />
   );
 }
@@ -30,22 +42,34 @@ function renderView({
 describe('MobileHabitView', () => {
   it('renders exactly one habit card at a time (the first habit by default)', () => {
     renderView();
-    // Only the first habit is visible
     expect(screen.getByText('Exercise')).toBeInTheDocument();
     expect(screen.queryByText('Read')).not.toBeInTheDocument();
     expect(screen.queryByText('Meditate')).not.toBeInTheDocument();
   });
 
-  it('shows dot indicators equal to the number of habits', () => {
+  it('shows dot indicators equal to totalSlots (habits + add slot when < 5)', () => {
     renderView();
     const dots = screen.getAllByTestId(/^indicator-dot-/);
-    expect(dots).toHaveLength(HABITS.length);
+    // HABITS.length = 3, hasAddSlot = true (3 < 5), totalSlots = 4
+    expect(dots).toHaveLength(HABITS.length + 1);
+  });
+
+  it('shows dot indicators equal to habit count when at 5 habits (no add slot)', () => {
+    const fiveHabits = [
+      { id: 1, name: 'A', emoji: '1️⃣', sort_order: 1 },
+      { id: 2, name: 'B', emoji: '2️⃣', sort_order: 2 },
+      { id: 3, name: 'C', emoji: '3️⃣', sort_order: 3 },
+      { id: 4, name: 'D', emoji: '4️⃣', sort_order: 4 },
+      { id: 5, name: 'E', emoji: '5️⃣', sort_order: 5 },
+    ];
+    renderView({ habits: fiveHabits });
+    const dots = screen.getAllByTestId(/^indicator-dot-/);
+    expect(dots).toHaveLength(5);
   });
 
   it('the first dot is marked active when on the first habit', () => {
     renderView();
-    const firstDot = screen.getByTestId('indicator-dot-0');
-    expect(firstDot).toHaveClass('active');
+    expect(screen.getByTestId('indicator-dot-0')).toHaveClass('active');
   });
 
   it('dots for non-active habits are not marked active', () => {
@@ -54,67 +78,85 @@ describe('MobileHabitView', () => {
     expect(screen.getByTestId('indicator-dot-2')).not.toHaveClass('active');
   });
 
-  it('renders a "Next" navigation button', () => {
+  it('does not render navigation buttons', () => {
     renderView();
-    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument();
   });
 
-  it('renders a "Previous" navigation button', () => {
-    renderView();
-    expect(screen.getByRole('button', { name: /previous/i })).toBeInTheDocument();
-  });
-
-  it('"Previous" is disabled or hidden on the first habit', () => {
-    renderView();
-    const prevBtn = screen.getByRole('button', { name: /previous/i });
-    // Acceptable: disabled attribute, aria-disabled, or not visible
-    const isDisabled = prevBtn.disabled || prevBtn.getAttribute('aria-disabled') === 'true';
-    expect(isDisabled).toBe(true);
-  });
-
-  it('"Next" is disabled or hidden on the last habit', async () => {
-    const user = userEvent.setup();
-    renderView();
-    // Navigate to last habit
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    const nextBtn = screen.getByRole('button', { name: /next/i });
-    const isDisabled = nextBtn.disabled || nextBtn.getAttribute('aria-disabled') === 'true';
-    expect(isDisabled).toBe(true);
-  });
-
-  it('clicking "Next" shows the next habit', async () => {
-    const user = userEvent.setup();
-    renderView();
-    await user.click(screen.getByRole('button', { name: /next/i }));
+  it('swiping left shows the next habit', () => {
+    const { container } = renderView();
+    swipeLeft(container.querySelector('.mobile-habit-view'));
     expect(screen.getByText('Read')).toBeInTheDocument();
     expect(screen.queryByText('Exercise')).not.toBeInTheDocument();
   });
 
-  it('clicking "Previous" shows the previous habit', async () => {
-    const user = userEvent.setup();
-    renderView();
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    await user.click(screen.getByRole('button', { name: /previous/i }));
+  it('swiping right shows the previous habit', () => {
+    const { container } = renderView();
+    const view = container.querySelector('.mobile-habit-view');
+    swipeLeft(view);
+    swipeRight(view);
     expect(screen.getByText('Exercise')).toBeInTheDocument();
     expect(screen.queryByText('Read')).not.toBeInTheDocument();
   });
 
-  it('the active dot index updates when navigating forward', async () => {
-    const user = userEvent.setup();
-    renderView();
-    await user.click(screen.getByRole('button', { name: /next/i }));
+  it('the active dot index updates when swiping forward', () => {
+    const { container } = renderView();
+    swipeLeft(container.querySelector('.mobile-habit-view'));
     expect(screen.getByTestId('indicator-dot-1')).toHaveClass('active');
     expect(screen.getByTestId('indicator-dot-0')).not.toHaveClass('active');
   });
 
-  it('the active dot index updates when navigating backward', async () => {
-    const user = userEvent.setup();
-    renderView();
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    await user.click(screen.getByRole('button', { name: /previous/i }));
+  it('the active dot index updates when swiping backward', () => {
+    const { container } = renderView();
+    const view = container.querySelector('.mobile-habit-view');
+    swipeLeft(view);
+    swipeLeft(view);
+    swipeRight(view);
     expect(screen.getByTestId('indicator-dot-1')).toHaveClass('active');
+  });
+
+  it('swiping left on the last habit shows the add slot', () => {
+    const onAddHabit = vi.fn();
+    const { container } = renderView({ onAddHabit });
+    const view = container.querySelector('.mobile-habit-view');
+    swipeLeft(view); // index 1
+    swipeLeft(view); // index 2
+    swipeLeft(view); // index 3 (add slot)
+    expect(screen.getByText('Add habit')).toBeInTheDocument();
+    expect(screen.queryByText('Meditate')).not.toBeInTheDocument();
+  });
+
+  it('the add-slot dot is marked active when on the add slot', () => {
+    const onAddHabit = vi.fn();
+    const { container } = renderView({ onAddHabit });
+    const view = container.querySelector('.mobile-habit-view');
+    swipeLeft(view);
+    swipeLeft(view);
+    swipeLeft(view); // add slot at index 3
+    expect(screen.getByTestId('indicator-dot-3')).toHaveClass('active');
+  });
+
+  it('clicking the add slot card calls onAddHabit', () => {
+    const onAddHabit = vi.fn();
+    const { container } = renderView({ onAddHabit });
+    const view = container.querySelector('.mobile-habit-view');
+    swipeLeft(view);
+    swipeLeft(view);
+    swipeLeft(view); // add slot
+    screen.getByText('Add habit').click();
+    expect(onAddHabit).toHaveBeenCalled();
+  });
+
+  it('swiping left on the add slot wraps back to the first habit', () => {
+    const onAddHabit = vi.fn();
+    const { container } = renderView({ onAddHabit });
+    const view = container.querySelector('.mobile-habit-view');
+    swipeLeft(view);
+    swipeLeft(view);
+    swipeLeft(view); // add slot
+    swipeLeft(view); // wrap to index 0
+    expect(screen.getByText('Exercise')).toBeInTheDocument();
   });
 
   it('the visible card has a Done! button that calls onStatusChange with pass', async () => {
@@ -141,22 +183,18 @@ describe('MobileHabitView', () => {
     expect(onStatusChange).toHaveBeenCalledWith(1, today, 'fail');
   });
 
-  it('action buttons call onStatusChange for the correct habit after navigation', async () => {
-    const user = userEvent.setup();
+  it('action buttons call onStatusChange for the correct habit after swiping', () => {
     const onStatusChange = vi.fn();
-    renderView({ onStatusChange });
-    await user.click(screen.getByRole('button', { name: /next/i }));
-    // Now on habit id: 2 ("Read")
-    await user.click(screen.getByRole('button', { name: /done!/i }));
+    const { container } = renderView({ onStatusChange });
+    swipeLeft(container.querySelector('.mobile-habit-view')); // now on habit id: 2 ("Read")
+    screen.getByRole('button', { name: /done!/i }).click();
     expect(onStatusChange).toHaveBeenCalledWith(2, today, 'pass');
   });
 
-  it('renders with a single habit without crashing, with navigation buttons disabled', () => {
+  it('renders with a single habit without crashing', () => {
     renderView({ habits: [{ id: 1, name: 'Solo', emoji: '⭐', sort_order: 1 }] });
     expect(screen.getByText('Solo')).toBeInTheDocument();
-    const prevBtn = screen.getByRole('button', { name: /previous/i });
-    const nextBtn = screen.getByRole('button', { name: /next/i });
-    expect(prevBtn.disabled || prevBtn.getAttribute('aria-disabled') === 'true').toBe(true);
-    expect(nextBtn.disabled || nextBtn.getAttribute('aria-disabled') === 'true').toBe(true);
+    // 1 habit + 1 add slot = 2 dots
+    expect(screen.getAllByTestId(/^indicator-dot-/)).toHaveLength(2);
   });
 });

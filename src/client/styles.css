@@ -1204,33 +1204,6 @@ em-emoji-picker {
   border-radius: 3px;
 }
 
-/* Navigation buttons */
-.navigation {
-  display: flex;
-  gap: 12px;
-}
-
-.nav-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--surface-raised);
-  color: var(--text-secondary);
-  font-size: 18px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-
-.nav-btn:not(:disabled):hover {
-  background: var(--surface);
-  border-color: var(--border-strong);
-  color: var(--text-primary);
-}
-
 /* Mobile add habit button */
 .add-habit-btn {
   width: 44px;
@@ -1250,6 +1223,39 @@ em-emoji-picker {
   border-color: var(--border-strong);
   color: var(--text-secondary);
   background: var(--surface);
+}
+
+/* Mobile add-habit swipe slot card */
+.mobile-add-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 40px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 200px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.mobile-add-card:hover {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
+.mobile-add-icon {
+  font-size: 48px;
+  color: var(--text-tertiary);
+  line-height: 1;
+}
+
+.mobile-add-label {
+  font-size: 15px;
+  color: var(--text-tertiary);
 }
 
 /* ===== Scrollbar styling ===== */
@@ -1535,11 +1541,22 @@ em-emoji-picker {
     padding: 4px 0 8px;
   }
 
-  /* ── Add habit button (mobile card view) ── */
-  .add-habit-btn.mobile-add {
-    width: 100%;
-    height: 64px;
-    border-radius: var(--radius);
-    font-size: 32px;
+  /* ── Mood calendar 3-month overflow fix ── */
+  .mood-calendar-panel {
+    padding: 12px;
+    overflow-x: hidden;
+  }
+
+  .mood-calendar-months {
+    gap: 8px;
+  }
+
+  .mood-calendar-month {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .mood-day-num {
+    font-size: 10px;
   }
 }
