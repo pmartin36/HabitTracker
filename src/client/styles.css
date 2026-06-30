@@ -912,12 +912,18 @@ a.full-calendar-link {
 }
 
 /* Mood day cell classes */
-.mood-1    { background: #4db87a;        color: #072010; }
-.mood-2    { background: #8fbdaa;        color: #0d2018; }
-.mood-3    { background: var(--border-strong); color: var(--text-secondary); }
-.mood-4    { background: var(--amber);  color: #1f1505; }
-.mood-5    { background: var(--rose);   color: #1f0505; }
+.mood-1    { background: #4db87a;                  }
+.mood-2    { background: #8fbdaa;                  }
+.mood-3    { background: var(--border-strong);     }
+.mood-4    { background: var(--amber);             }
+.mood-5    { background: var(--rose);              }
 .mood-none { background: var(--surface-raised); border: 1px solid var(--border); }
+
+/* Day number contrast per background brightness */
+.mood-1 .mood-day-num,
+.mood-2 .mood-day-num { color: rgba(0, 25, 10, 0.65); }
+.mood-4 .mood-day-num { color: rgba(25, 12, 0, 0.65); }
+.mood-5 .mood-day-num { color: rgba(255,255,255, 0.6); }
 
 /* Mood calendar header */
 .mood-cal-header {
