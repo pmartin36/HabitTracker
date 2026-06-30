@@ -601,26 +601,26 @@ input {
 /* ===== Shared status classes (mini + full calendar) ===== */
 .status-pass {
   background: var(--sage);
-  color: #0d1f15;
-  font-weight: 600;
+  color: #07180d;
+  font-weight: 700;
 }
 
 .status-skip {
   background: var(--amber);
-  color: #1f1505;
-  font-weight: 600;
+  color: #1f1000;
+  font-weight: 700;
 }
 
 .status-fail {
   background: var(--rose);
-  color: #1f0505;
-  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  font-weight: 700;
 }
 
 .status-pending {
   background: var(--surface-raised);
   border: 1px solid var(--border);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 /* ===== "Go to full calendar" link ===== */
