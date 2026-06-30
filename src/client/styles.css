@@ -1204,6 +1204,54 @@ em-emoji-picker {
   border-radius: 3px;
 }
 
+/* Card swipe transition */
+.card-stage {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 480px;
+}
+
+.card-slot {
+  width: 100%;
+}
+
+.card-slot.exit-left {
+  animation: slide-exit-left 0.28s ease-in-out forwards;
+}
+
+.card-slot.exit-right {
+  animation: slide-exit-right 0.28s ease-in-out forwards;
+}
+
+.card-slot.enter-left {
+  animation: slide-enter-left 0.28s ease-in-out forwards;
+}
+
+.card-slot.enter-right {
+  animation: slide-enter-right 0.28s ease-in-out forwards;
+}
+
+@keyframes slide-exit-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+@keyframes slide-exit-right {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
+@keyframes slide-enter-left {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slide-enter-right {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
 /* Mobile add habit button */
 .add-habit-btn {
   width: 44px;

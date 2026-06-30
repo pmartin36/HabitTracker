@@ -16,6 +16,7 @@ export default function MobileHabitView({
   onDeleteHabit = () => {},
 }) {
   const [index, setIndex] = useState(0);
+  const [transition, setTransition] = useState(null);
   const [editingHabit, setEditingHabit] = useState(null);
   const [calendarHabit, setCalendarHabit] = useState(null);
   const [touchStartX, setTouchStartX] = useState(null);
@@ -38,12 +39,65 @@ export default function MobileHabitView({
 
   const hasAddSlot = habits.length < 5;
   const totalSlots = habits.length + (hasAddSlot ? 1 : 0);
-  const isAddSlot = index === habits.length && hasAddSlot;
 
-  const habit = !isAddSlot ? habits[index] : null;
-  const habitEntries = habit ? entries.filter(e => e.habit_id === habit.id) : [];
-  const todayEntry = habit ? habitEntries.find(e => e.date === today) : null;
-  const currentStatus = todayEntry?.status;
+  function navigate(dir) {
+    const next = dir === 'left'
+      ? (index + 1) % totalSlots
+      : (index - 1 + totalSlots) % totalSlots;
+    setIndex(next);
+    setTransition({ dir });
+    setTimeout(() => setTransition(null), 280);
+  }
+
+  function renderSlot(idx) {
+    const isAdd = idx === habits.length && hasAddSlot;
+    if (isAdd) {
+      return (
+        <div className="mobile-add-card" onClick={onAddHabit}>
+          <span className="mobile-add-icon">+</span>
+          <span className="mobile-add-label">Add habit</span>
+        </div>
+      );
+    }
+    const h = habits[idx];
+    const habitEntries = entries.filter(e => e.habit_id === h.id);
+    const todayEntry = habitEntries.find(e => e.date === today);
+    const currentStatus = todayEntry?.status;
+    return (
+      <div className="habit-card">
+        <div className="card-header">
+          <span className="habit-emoji">{h.emoji}</span>
+          <span className="habit-name">{h.name}</span>
+          <button
+            className="edit-btn"
+            onClick={() => setEditingHabit(h)}
+            aria-label={`Edit ${h.name}`}
+          >
+            ✎
+          </button>
+        </div>
+        <HabitActions
+          habitId={h.id}
+          date={today}
+          onStatusChange={onStatusChange}
+          currentStatus={currentStatus}
+        />
+        <AnimatedStreak key={h.id} value={streaks[h.id] ?? 0} />
+        <div data-testid={`mini-calendar-${h.id}`}>
+          <MiniCalendar
+            habitId={h.id}
+            entries={habitEntries}
+            onStatusChange={(date, status) => onStatusChange(h.id, date, status)}
+            year={currentYear}
+            month={currentMonth}
+          />
+        </div>
+        <button className="full-cal-link" onClick={() => setCalendarHabit(h)}>
+          Full Calendar →
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -54,49 +108,15 @@ export default function MobileHabitView({
         const dx = e.changedTouches[0].clientX - touchStartX;
         setTouchStartX(null);
         if (Math.abs(dx) < 50) return;
-        if (dx < 0) setIndex(i => (i + 1) % totalSlots);
-        else        setIndex(i => (i - 1 + totalSlots) % totalSlots);
+        if (dx < 0) navigate('left');
+        else        navigate('right');
       }}
     >
-      {isAddSlot ? (
-        <div className="mobile-add-card" onClick={onAddHabit}>
-          <span className="mobile-add-icon">+</span>
-          <span className="mobile-add-label">Add habit</span>
+      <div className="card-stage">
+        <div key={index} className={`card-slot${transition ? ` enter-${transition.dir}` : ''}`}>
+          {renderSlot(index)}
         </div>
-      ) : (
-        <div className="habit-card">
-          <div className="card-header">
-            <span className="habit-emoji">{habit.emoji}</span>
-            <span className="habit-name">{habit.name}</span>
-            <button
-              className="edit-btn"
-              onClick={() => setEditingHabit(habit)}
-              aria-label={`Edit ${habit.name}`}
-            >
-              ✎
-            </button>
-          </div>
-          <HabitActions
-            habitId={habit.id}
-            date={today}
-            onStatusChange={onStatusChange}
-            currentStatus={currentStatus}
-          />
-          <AnimatedStreak key={habit.id} value={streaks[habit.id] ?? 0} />
-          <div data-testid={`mini-calendar-${habit.id}`}>
-            <MiniCalendar
-              habitId={habit.id}
-              entries={habitEntries}
-              onStatusChange={(date, status) => onStatusChange(habit.id, date, status)}
-              year={currentYear}
-              month={currentMonth}
-            />
-          </div>
-          <button className="full-cal-link" onClick={() => setCalendarHabit(habit)}>
-            Full Calendar →
-          </button>
-        </div>
-      )}
+      </div>
       <div className="indicator-dots">
         {Array.from({ length: totalSlots }, (_, i) => (
           <span key={i} data-testid={`indicator-dot-${i}`} className={`indicator-dot${i === index ? ' active' : ''}`} />
