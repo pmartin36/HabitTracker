@@ -327,6 +327,19 @@ input {
   animation: card-wash 0.8s ease-out;
 }
 
+.habit-card[draggable] {
+  cursor: grab;
+}
+
+.habit-card[draggable]:active {
+  cursor: grabbing;
+}
+
+.habit-card.drag-over {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 2px rgba(111, 168, 130, 0.25);
+}
+
 /* Card header */
 .card-header {
   display: flex;

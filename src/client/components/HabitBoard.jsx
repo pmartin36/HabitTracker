@@ -14,6 +14,7 @@ export default function HabitBoard({
   streaks = {},
   onEditHabit = () => {},
   onDeleteHabit = () => {},
+  onReorderHabits = () => {},
   currentYear,
   currentMonth,
 }) {
@@ -24,6 +25,8 @@ export default function HabitBoard({
   const [editingHabit, setEditingHabit] = useState(null);
   const [calendarHabit, setCalendarHabit] = useState(null);
   const [passingHabit, setPassingHabit] = useState(null);
+  const [dragId, setDragId] = useState(null);
+  const [dragOver, setDragOver] = useState(null);
 
   function handleStatusChange(habitId, date, status) {
     if (status === 'pass') {
@@ -43,7 +46,18 @@ export default function HabitBoard({
           <div
             key={habit.id}
             data-testid={`habit-card-${habit.id}`}
-            className={`habit-card${passingHabit === habit.id ? ' just-passed' : ''}`}
+            className={`habit-card${passingHabit === habit.id ? ' just-passed' : ''}${dragOver === habit.id ? ' drag-over' : ''}`}
+            draggable
+            onDragStart={() => setDragId(habit.id)}
+            onDragOver={e => { e.preventDefault(); setDragOver(habit.id); }}
+            onDragLeave={() => setDragOver(null)}
+            onDrop={() => {
+              if (dragId !== habit.id) onReorderHabits(dragId, habit.id);
+              setDragId(null);
+              setDragOver(null);
+            }}
+            onDragEnd={() => { setDragId(null); setDragOver(null); }}
+            style={dragId === habit.id ? { opacity: 0.4 } : undefined}
           >
             <div className="card-header">
               <span className="habit-emoji">{habit.emoji}</span>

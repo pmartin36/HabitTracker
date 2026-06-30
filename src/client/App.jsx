@@ -97,6 +97,22 @@ export default function App() {
     await fetchHabits();
   };
 
+  const handleReorderHabits = async (draggedId, targetId) => {
+    const reordered = [...habits];
+    const fromIdx = reordered.findIndex(h => h.id === draggedId);
+    const toIdx   = reordered.findIndex(h => h.id === targetId);
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+    // Optimistic update
+    setHabits(reordered);
+    // Persist
+    await fetch('/api/habits/reorder', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reordered.map((h, i) => ({ id: h.id, sort_order: i + 1 }))),
+    });
+  };
+
   const onAddHabit = () => setShowAddModal(true);
 
   const handleAddHabitSubmit = async (name, emoji) => {
@@ -158,6 +174,7 @@ export default function App() {
           streaks={streaks}
           onEditHabit={handleEditHabit}
           onDeleteHabit={handleDeleteHabit}
+          onReorderHabits={handleReorderHabits}
           currentYear={currentYear}
           currentMonth={currentMonthNum}
         />
