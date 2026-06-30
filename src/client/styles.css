@@ -894,7 +894,7 @@ a.full-calendar-link {
 
 /* Mood day cell classes */
 .mood-1    { background: var(--sage);   color: #0d1f15; }
-.mood-2    { background: #4a8a62;       color: #0d1f15; }
+.mood-2    { background: #7ec8a0;       color: #0a2018; }
 .mood-3    { background: var(--border-strong); color: var(--text-secondary); }
 .mood-4    { background: var(--amber);  color: #1f1505; }
 .mood-5    { background: var(--rose);   color: #1f0505; }
