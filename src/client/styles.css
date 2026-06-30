@@ -77,30 +77,23 @@ input {
 }
 
 /* ===== Mood strip ===== */
+
+/* Desktop: single row — label | icons | ··· | dots | calendar */
 .mood-strip {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
-.mood-strip-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+/* Dissolve wrapper divs so children join the parent flex row */
+.mood-strip-top    { display: contents; }
+.mood-strip-bottom { display: contents; }
 
-.mood-strip-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* legacy — kept for safety */
-.mood-strip-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+.mood-label           { order: 1; }
+.mood-icons           { order: 2; }
+.mood-recent-days     { order: 3; margin-left: auto; }
+.mood-calendar-toggle { order: 4; }
 
 .mood-icons {
   display: flex;
@@ -1529,11 +1522,35 @@ em-emoji-picker {
     width: 100%;
   }
 
-  /* ── Mood strip mobile ── */
+  /* ── Mood strip mobile: two-row layout ── */
   .mood-strip-container {
     padding: 10px 16px;
     margin-left: 0;
     margin-right: 0;
+  }
+
+  .mood-strip {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Restore wrapper divs as flex rows on mobile */
+  .mood-strip-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .mood-strip-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .mood-recent-days {
+    margin-left: 0;
   }
 
   /* ── Mobile habit card readability ── */
