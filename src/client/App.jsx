@@ -133,13 +133,13 @@ export default function App() {
           currentRating={todayMood?.rating}
           isEditable={!todayMood?.locked}
           onRatingChange={handleMoodChange}
-          showCalendarButton={!!todayMood}
+          showCalendarButton={true}
           showingCalendar={showMoodCalendar}
           onToggleCalendar={() => setShowMoodCalendar((v) => !v)}
           recentMoods={recentMoods}
         />
       </div>
-      {showMoodCalendar && todayMood && (
+      {showMoodCalendar && (
         <div className="mood-calendar-panel">
           <MoodCalendar
             moods={moods}
