@@ -24,8 +24,8 @@ npm start
 
 The app uses `node-cron` internally — no system cron setup needed. Three jobs run daily:
 
-- **8:00 am** — Grace-window warning: fires only if yesterday still has pending habits
-- **8:30 am** — Locks yesterday's grace window, then sends a full summary of yesterday's results
+- **Midnight** — Locks pending entries/moods outside the grace window (anything older than yesterday becomes fail)
+- **8:00 am** — Sends yesterday's habit status with a link to the check-in modal
 - **9:00 pm** — Evening check-in showing today's current status
 
 Notifications are sent via [ntfy.sh](https://ntfy.sh). Pick a hard-to-guess topic name — topics are public by obscurity on the ntfy.sh public server.
