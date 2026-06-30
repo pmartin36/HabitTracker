@@ -4,8 +4,9 @@ import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
 import HabitBoard from '../../src/client/components/HabitBoard.jsx';
 
-// Today in YYYY-MM-DD, matching how the component should format the date
-const today = new Date().toISOString().split('T')[0];
+// Today in YYYY-MM-DD using local time, matching todayString() in the component
+const _d = new Date();
+const today = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
 
 const SAMPLE_HABITS = [
   { id: 1, name: 'Exercise', emoji: '🏃', sort_order: 1 },

@@ -180,16 +180,15 @@ describe('App', () => {
 
   // ── Mood Calendar toggle ─────────────────────────────────────────────────
 
-  it('"Mood Calendar" button is NOT visible when no mood is set', async () => {
+  it('"Mood Calendar" button is always visible', async () => {
     global.fetch = makeFetchMock({ mood: [] });
     render(<App />);
-    // Wait for component to finish loading (mood-strip signals the render settled)
     await waitFor(() => {
       expect(screen.getByTestId('mood-strip')).toBeInTheDocument();
     });
     expect(
-      screen.queryByRole('button', { name: /mood calendar/i })
-    ).not.toBeInTheDocument();
+      screen.getByRole('button', { name: /mood calendar/i })
+    ).toBeInTheDocument();
   });
 
   it('"Mood Calendar" button IS visible after a mood rating is fetched', async () => {
