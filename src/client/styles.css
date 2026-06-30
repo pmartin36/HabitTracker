@@ -911,7 +911,7 @@ a.full-calendar-link {
   color: var(--text-tertiary);
 }
 
-/* Mood day cell classes */
+/* Mood day cell classes — used by strip dots (.mood-recent-day) and calendar cells */
 .mood-1    { background: #4db87a;                  }
 .mood-2    { background: #8fbdaa;                  }
 .mood-3    { background: #7a7870;                  }
@@ -924,6 +924,18 @@ a.full-calendar-link {
 .mood-2 .mood-day-num { color: rgba(0, 25, 10, 0.65); }
 .mood-4 .mood-day-num { color: rgba(25, 12, 0, 0.65); }
 .mood-5 .mood-day-num { color: rgba(255,255,255, 0.6); }
+
+/* Calendar cells: border accent so emojis are always readable on a dark background */
+.mood-calendar .mood-day.mood-1 { background: var(--surface-raised); border: 3px solid #4db87a; }
+.mood-calendar .mood-day.mood-2 { background: var(--surface-raised); border: 3px solid #8fbdaa; }
+.mood-calendar .mood-day.mood-3 { background: var(--surface-raised); border: 3px solid #7a7870; }
+.mood-calendar .mood-day.mood-4 { background: var(--surface-raised); border: 3px solid var(--amber); }
+.mood-calendar .mood-day.mood-5 { background: var(--surface-raised); border: 3px solid var(--rose); }
+
+/* Dark background means all day numbers use the same white */
+.mood-calendar .mood-1 .mood-day-num,
+.mood-calendar .mood-2 .mood-day-num,
+.mood-calendar .mood-4 .mood-day-num { color: rgba(255,255,255,0.5); }
 
 /* Mood calendar header */
 .mood-cal-header {
