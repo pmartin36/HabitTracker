@@ -111,7 +111,11 @@ export default function MoodCalendar({ moods, habitPasses, initialYear, initialM
     <div className="mood-calendar">
       <div className="mood-cal-header">
         <button className="mood-cal-nav" aria-label="Previous" onClick={() => navigate(-1)}>‹</button>
-        <span className="mood-cal-title">{view === 'year' ? yearViewYear : '...'}</span>
+        <span className="mood-cal-title">
+          {view === 'year'
+            ? yearViewYear
+            : `${MONTH_NAMES[threeMonths[0].month - 1].slice(0, 3)} – ${MONTH_NAMES[threeMonths[2].month - 1].slice(0, 3)} ${threeMonths[2].year}`}
+        </span>
         <button className="mood-cal-nav" aria-label="Next" onClick={() => navigate(1)}>›</button>
         <div className="mood-view-toggle">
           <button className={view === '3month' ? 'active' : ''} onClick={() => setView('3month')}>3M</button>
