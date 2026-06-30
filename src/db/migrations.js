@@ -27,5 +27,17 @@ export function runMigrations(db) {
       locked     INTEGER NOT NULL DEFAULT 0,
       updated_at TEXT    NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY);
   `);
+
+  const { version } = db
+    .prepare('SELECT COALESCE(MAX(version), 0) AS version FROM schema_version')
+    .get();
+
+  if (version < 1) {
+    db.exec(`ALTER TABLE habits ADD COLUMN archived_at TEXT DEFAULT NULL`);
+    db.exec(`ALTER TABLE habits ADD COLUMN streak_from TEXT DEFAULT NULL`);
+    db.prepare('INSERT INTO schema_version (version) VALUES (1)').run();
+  }
 }

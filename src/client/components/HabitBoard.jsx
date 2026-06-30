@@ -105,7 +105,7 @@ export default function HabitBoard({
             onEditHabit(id, name, emoji);
             setEditingHabit(null);
           }}
-          onDelete={(id) => {
+          onArchive={(id) => {
             onDeleteHabit(id);
             setEditingHabit(null);
           }}

@@ -181,31 +181,88 @@ describe("Habits API", () => {
 
   // ── DELETE /api/habits/:id ───────────────────────────────────────────────────
 
-  describe("DELETE /api/habits/:id", () => {
-    it("deletes a habit and returns 204", async () => {
+  describe("DELETE /api/habits/:id (archive)", () => {
+    it("archives a habit and returns 204", async () => {
       db.prepare(
         "INSERT INTO habits (name, emoji, sort_order) VALUES (?, ?, ?)"
-      ).run("To Delete", "🗑️", 1);
-      const { id } = db.prepare("SELECT id FROM habits LIMIT 1").get();
+      ).run("To Archive", "🗑️", 1);
+      const { id } = db.prepare("SELECT id FROM habits WHERE archived_at IS NULL LIMIT 1").get();
 
       const res = await request(app).delete(`/api/habits/${id}`);
       expect(res.status).toBe(204);
     });
 
-    it("removes the row from the database", async () => {
+    it("sets archived_at on the habit row instead of deleting it", async () => {
       db.prepare(
         "INSERT INTO habits (name, emoji, sort_order) VALUES (?, ?, ?)"
       ).run("Gone", "👻", 1);
-      const { id } = db.prepare("SELECT id FROM habits LIMIT 1").get();
+      const { id } = db.prepare("SELECT id FROM habits WHERE archived_at IS NULL LIMIT 1").get();
 
       await request(app).delete(`/api/habits/${id}`);
       const row = db.prepare("SELECT * FROM habits WHERE id = ?").get(id);
-      expect(row).toBeUndefined();
+      expect(row).toBeDefined();
+      expect(row.archived_at).not.toBeNull();
+    });
+
+    it("hides archived habits from GET /api/habits", async () => {
+      db.prepare(
+        "INSERT INTO habits (name, emoji, sort_order) VALUES (?, ?, ?)"
+      ).run("Hidden", "🙈", 1);
+      const { id } = db.prepare("SELECT id FROM habits WHERE archived_at IS NULL LIMIT 1").get();
+
+      await request(app).delete(`/api/habits/${id}`);
+      const res = await request(app).get("/api/habits");
+      expect(res.body.find(h => h.id === id)).toBeUndefined();
     });
 
     it("returns 404 for an unknown id", async () => {
       const res = await request(app).delete("/api/habits/9999");
       expect(res.status).toBe(404);
+    });
+  });
+
+  describe("GET /api/habits/archived", () => {
+    it("returns only archived habits", async () => {
+      db.prepare("INSERT INTO habits (name, emoji, sort_order) VALUES (?, ?, ?)").run("Active", "✅", 1);
+      db.prepare("INSERT INTO habits (name, emoji, sort_order) VALUES (?, ?, ?)").run("Archived", "📦", 2);
+      const { id } = db.prepare("SELECT id FROM habits WHERE name = 'Archived'").get();
+      await request(app).delete(`/api/habits/${id}`);
+
+      const res = await request(app).get("/api/habits/archived");
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].id).toBe(id);
+    });
+  });
+
+  describe("POST /api/habits/:id/reinstate", () => {
+    it("clears archived_at and sets streak_from", async () => {
+      db.prepare("INSERT INTO habits (name, emoji, sort_order) VALUES (?, ?, ?)").run("Old", "🔄", 1);
+      const { id } = db.prepare("SELECT id FROM habits LIMIT 1").get();
+      await request(app).delete(`/api/habits/${id}`);
+
+      const res = await request(app).post(`/api/habits/${id}/reinstate`);
+      expect(res.status).toBe(200);
+      const row = db.prepare("SELECT * FROM habits WHERE id = ?").get(id);
+      expect(row.archived_at).toBeNull();
+      expect(row.streak_from).not.toBeNull();
+    });
+
+    it("returns 404 if habit is not archived", async () => {
+      db.prepare("INSERT INTO habits (name, emoji, sort_order) VALUES (?, ?, ?)").run("Active", "✅", 1);
+      const { id } = db.prepare("SELECT id FROM habits LIMIT 1").get();
+      const res = await request(app).post(`/api/habits/${id}/reinstate`);
+      expect(res.status).toBe(404);
+    });
+
+    it("returns 409 if already at 5 active habits", async () => {
+      for (let i = 1; i <= 5; i++) {
+        db.prepare("INSERT INTO habits (name, emoji, sort_order) VALUES (?, ?, ?)").run(`H${i}`, "⭐", i);
+      }
+      db.prepare("INSERT INTO habits (name, emoji, sort_order, archived_at) VALUES (?, ?, ?, datetime('now'))").run("Old", "📦", 6);
+      const { id } = db.prepare("SELECT id FROM habits WHERE name = 'Old'").get();
+      const res = await request(app).post(`/api/habits/${id}/reinstate`);
+      expect(res.status).toBe(409);
     });
   });
 

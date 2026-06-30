@@ -1,7 +1,7 @@
 import { addDays, toDateString } from './utils/date.js';
 
 export function computeStreak(db, habit_id, asOfDate) {
-  const habit = db.prepare('SELECT created_at FROM habits WHERE id = ?').get(habit_id);
+  const habit = db.prepare('SELECT created_at, streak_from FROM habits WHERE id = ?').get(habit_id);
   if (!habit) return 0;
 
   // Walk back to the earliest entry date so retroactively-marked entries
@@ -11,7 +11,9 @@ export function computeStreak(db, habit_id, asOfDate) {
   const earliest = db.prepare(
     'SELECT MIN(date) AS d FROM entries WHERE habit_id = ?'
   ).get(habit_id);
-  const boundary = earliest?.d ?? habit.created_at.slice(0, 10);
+  let boundary = earliest?.d ?? habit.created_at.slice(0, 10);
+  // streak_from is set on reinstatement — don't count history before that date
+  if (habit.streak_from && habit.streak_from > boundary) boundary = habit.streak_from;
 
   const getEntry = db.prepare('SELECT status FROM entries WHERE habit_id = ? AND date = ?');
   let current = toDateString(asOfDate);

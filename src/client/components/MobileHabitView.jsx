@@ -129,7 +129,7 @@ export default function MobileHabitView({
             onEditHabit(id, name, emoji);
             setEditingHabit(null);
           }}
-          onDelete={(id) => {
+          onArchive={(id) => {
             onDeleteHabit(id);
             setEditingHabit(null);
           }}

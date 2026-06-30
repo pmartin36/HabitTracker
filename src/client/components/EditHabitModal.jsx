@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 
-export default function EditHabitModal({ habit, onSave, onDelete, onClose }) {
+export default function EditHabitModal({ habit, onSave, onArchive, onClose }) {
   const [name, setName] = useState(habit.name);
   const [emoji, setEmoji] = useState(habit.emoji || '🎯');
   const [error, setError] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmArchive, setConfirmArchive] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -79,28 +79,28 @@ export default function EditHabitModal({ habit, onSave, onDelete, onClose }) {
         </form>
 
         <div className="edit-delete-section">
-          {!confirmDelete ? (
+          {!confirmArchive ? (
             <button
               type="button"
               className="delete-btn"
-              onClick={() => setConfirmDelete(true)}
+              onClick={() => setConfirmArchive(true)}
             >
-              Delete Habit
+              Archive Habit
             </button>
           ) : (
             <div className="delete-confirm">
-              <span className="delete-confirm-text">Are you sure?</span>
+              <span className="delete-confirm-text">Archive this habit?</span>
               <button
                 type="button"
                 className="delete-confirm-yes"
-                onClick={() => onDelete(habit.id)}
+                onClick={() => onArchive(habit.id)}
               >
-                Yes, delete
+                Archive
               </button>
               <button
                 type="button"
                 className="delete-confirm-cancel"
-                onClick={() => setConfirmDelete(false)}
+                onClick={() => setConfirmArchive(false)}
               >
                 Cancel
               </button>

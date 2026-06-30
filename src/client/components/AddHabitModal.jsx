@@ -2,14 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 
-export default function AddHabitModal({ onSubmit, onClose }) {
+export default function AddHabitModal({ onSubmit, onReinstate, onClose }) {
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('🎯');
   const [error, setError] = useState('');
+  const [archived, setArchived] = useState([]);
   const inputRef = useRef(null);
 
   useEffect(() => {
     inputRef.current?.focus();
+    fetch('/api/habits/archived')
+      .then(r => r.json())
+      .then(setArchived)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -35,6 +40,11 @@ export default function AddHabitModal({ onSubmit, onClose }) {
 
   const handleEmojiSelect = (emojiData) => {
     setEmoji(emojiData.native);
+  };
+
+  const handleReinstate = async (id) => {
+    await onReinstate(id);
+    onClose();
   };
 
   return (
@@ -76,6 +86,28 @@ export default function AddHabitModal({ onSubmit, onClose }) {
             <button type="button" className="modal-cancel" onClick={onClose}>Cancel</button>
           </div>
         </form>
+
+        {archived.length > 0 && (
+          <div className="archived-habits-section">
+            <div className="archived-habits-heading">Past habits</div>
+            <div className="archived-habits-list">
+              {archived.map(h => (
+                <div key={h.id} className="archived-habit-row">
+                  <span className="archived-habit-name">
+                    <span>{h.emoji}</span>{h.name}
+                  </span>
+                  <button
+                    type="button"
+                    className="archived-habit-resume"
+                    onClick={() => handleReinstate(h.id)}
+                  >
+                    Resume
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

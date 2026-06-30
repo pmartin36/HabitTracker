@@ -164,6 +164,32 @@ describe("computeStreak", () => {
     expect(computeStreak(db, habitId, "2024-01-01")).toBe(1);
   });
 
+  // ── streak_from boundary (reinstatement) ────────────────────────────────────
+
+  it("streak_from ignores passes before the reinstatement date", () => {
+    // Old history before archival: 5 consecutive passes
+    addEntry("2024-01-01", "pass");
+    addEntry("2024-01-02", "pass");
+    addEntry("2024-01-03", "pass");
+    addEntry("2024-01-04", "pass");
+    addEntry("2024-01-05", "pass");
+    // Gap: Jan 6 – Jan 9 (archived, no entries)
+    // Reinstated on Jan 10: set streak_from
+    db.prepare("UPDATE habits SET streak_from = '2024-01-10' WHERE id = ?").run(habitId);
+    addEntry("2024-01-10", "pass");
+    // Without streak_from, streak would include old passes through the gap (= 6).
+    // With streak_from, only Jan 10 counts → streak = 1.
+    expect(computeStreak(db, habitId, "2024-01-10")).toBe(1);
+  });
+
+  it("streak_from allows new streak to grow normally after reinstatement", () => {
+    db.prepare("UPDATE habits SET streak_from = '2024-01-10' WHERE id = ?").run(habitId);
+    addEntry("2024-01-10", "pass");
+    addEntry("2024-01-11", "pass");
+    addEntry("2024-01-12", "pass");
+    expect(computeStreak(db, habitId, "2024-01-12")).toBe(3);
+  });
+
   // ── Return type ──────────────────────────────────────────────────────────────
 
   it("always returns an integer", () => {

@@ -91,9 +91,12 @@ export default function App() {
   };
 
   const handleDeleteHabit = async (id) => {
-    await fetch(`/api/habits/${id}`, {
-      method: 'DELETE',
-    });
+    await fetch(`/api/habits/${id}`, { method: 'DELETE' });
+    await fetchHabits();
+  };
+
+  const handleReinstateHabit = async (id) => {
+    await fetch(`/api/habits/${id}/reinstate`, { method: 'POST' });
     await fetchHabits();
   };
 
@@ -195,6 +198,7 @@ export default function App() {
       {showAddModal && (
         <AddHabitModal
           onSubmit={handleAddHabitSubmit}
+          onReinstate={handleReinstateHabit}
           onClose={() => setShowAddModal(false)}
         />
       )}
