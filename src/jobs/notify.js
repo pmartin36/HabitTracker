@@ -31,7 +31,7 @@ export async function buildNotificationMessage(db, asOfDate) {
   }
 
   lines.push('');
-  lines.push(`${process.env.APP_URL ?? 'http://localhost:3000'}/checkin`);
+  lines.push(`${process.env.APP_URL ?? 'http://localhost:3000'}/habittracker/checkin`);
 
   return lines.join('\n');
 }
@@ -61,7 +61,7 @@ export async function buildGraceWarningMessage(db, asOfDate) {
   }
 
   lines.push('');
-  lines.push(`Check in before tonight → ${process.env.APP_URL ?? 'http://localhost:3000'}`);
+  lines.push(`Check in before tonight → ${process.env.APP_URL ?? 'http://localhost:3000'}/habittracker/checkin`);
 
   return lines.join('\n');
 }
@@ -90,7 +90,7 @@ export async function buildEveningMessage(db, asOfDate) {
   }
 
   lines.push('');
-  lines.push(process.env.APP_URL ?? 'http://localhost:3000');
+  lines.push(`${process.env.APP_URL ?? 'http://localhost:3000'}/habittracker/checkin`);
 
   return lines.join('\n');
 }

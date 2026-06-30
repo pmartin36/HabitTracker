@@ -14,7 +14,7 @@ export default function App() {
   const [streaks, setStreaks] = useState({});
   const [showMoodCalendar, setShowMoodCalendar] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showCheckinModal, setShowCheckinModal] = useState(() => window.location.pathname === '/checkin');
+  const [showCheckinModal, setShowCheckinModal] = useState(() => window.location.pathname.endsWith('/checkin'));
   const [isDesktop] = useState(() => window.innerWidth >= 768);
 
   const today = todayString();

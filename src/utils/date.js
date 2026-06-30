@@ -10,7 +10,12 @@ export function addDays(dateStr, n) {
 }
 
 export function localToday() {
-  return toDateString(new Date());
+  const tz = process.env.TZ ?? 'America/New_York';
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).formatToParts(new Date());
+  const y = parts.find(p => p.type === 'year').value;
+  const m = parts.find(p => p.type === 'month').value;
+  const d = parts.find(p => p.type === 'day').value;
+  return `${y}-${m}-${d}`;
 }
 
 export function toDateString(d) {
