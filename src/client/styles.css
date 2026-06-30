@@ -861,6 +861,7 @@ a.full-calendar-link {
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
   margin-top: 0.75rem;
+  overflow: visible;
 }
 
 .mood-day {
@@ -985,6 +986,40 @@ a.full-calendar-link {
   color: var(--text-primary);
 }
 
+.mood-legend-toggle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mood-legend-toggle:hover,
+.mood-legend-toggle.active {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface-raised);
+}
+
+.mood-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.mood-legend-item {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
 /* Year view: 4 columns */
 .mood-calendar-months.year-view {
   grid-template-columns: repeat(4, 1fr);
@@ -1030,6 +1065,30 @@ a.full-calendar-link {
 /* Allow grid to shrink columns */
 .mood-calendar-months.year-view .mood-calendar-month {
   min-width: 0;
+}
+
+.mood-day-tooltip {
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 11px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.55);
+  line-height: 1.6;
+}
+.tooltip-mood {
+  font-weight: 600;
+}
+.tooltip-pass {
+  color: var(--text-secondary);
 }
 
 /* Future month cells: dimmed, no interaction */

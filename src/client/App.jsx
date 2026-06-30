@@ -139,7 +139,7 @@ export default function App() {
     .filter((e) => e.status === 'pass')
     .map((e) => {
       const habit = habits.find((h) => h.id === e.habit_id);
-      return { date: e.date, emoji: habit?.emoji };
+      return { date: e.date, emoji: habit?.emoji, name: habit?.name };
     });
 
   return (
@@ -160,6 +160,7 @@ export default function App() {
           <MoodCalendar
             moods={moods}
             habitPasses={habitPasses}
+            habits={habits}
             initialYear={currentYear}
             initialMonth={currentMonthNum}
           />

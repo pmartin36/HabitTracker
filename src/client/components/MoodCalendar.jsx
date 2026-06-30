@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { MONTH_NAMES, daysInMonth, formatDate } from '../utils/date.js';
 
+const MOOD_LABELS = ['', 'Very Good', 'Good', 'Neutral', 'Not Great', 'Bad'];
+const MOOD_ICONS  = ['', '😄', '🙂', '😐', '🙁', '😣'];
+
 function offsetMonth(year, month, delta) {
   const d = new Date(year, month - 1 + delta);
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
@@ -15,11 +18,18 @@ function buildMoodDays(year, month) {
   return days;
 }
 
-function MoodDayCell({ day, entry, passes, ...rest }) {
+function MoodDayCell({ day, dateStr, entry, passes, ...rest }) {
+  const [hovered, setHovered] = useState(false);
   const topRow = passes.slice(0, 3);
   const bottomRow = passes.slice(3, 5);
+  const hasTooltip = entry || passes.length > 0;
   return (
-    <div className={`mood-day mood-${entry?.rating ?? 'none'}`} {...rest}>
+    <div
+      className={`mood-day mood-${entry?.rating ?? 'none'}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      {...rest}
+    >
       <div className="mood-day-emojis">
         {topRow.length > 0 && (
           <div className="mood-emoji-row">{topRow.map((p, i) => <span key={i}>{p.emoji}</span>)}</div>
@@ -29,14 +39,25 @@ function MoodDayCell({ day, entry, passes, ...rest }) {
         )}
       </div>
       <span className="mood-day-num">{day}</span>
+      {hovered && hasTooltip && (
+        <div className="mood-day-tooltip">
+          {entry && (
+            <div className="tooltip-mood">{MOOD_ICONS[entry.rating]} {MOOD_LABELS[entry.rating]}</div>
+          )}
+          {passes.map((p, i) => (
+            <div key={i} className="tooltip-pass">{p.emoji} {p.name}</div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-export default function MoodCalendar({ moods, habitPasses, initialYear, initialMonth }) {
+export default function MoodCalendar({ moods, habitPasses, habits, initialYear, initialMonth }) {
   const [{ year, month }, setYearMonth] = useState({ year: initialYear, month: initialMonth });
   const [view, setView] = useState('3month');
   const [yearViewYear, setYearViewYear] = useState(initialYear);
+  const [showLegend, setShowLegend] = useState(false);
 
   function navigate(delta) {
     if (view === 'year') {
@@ -87,6 +108,7 @@ export default function MoodCalendar({ moods, habitPasses, initialYear, initialM
               <MoodDayCell
                 key={dateStr}
                 day={day}
+                dateStr={dateStr}
                 entry={entry}
                 passes={passes}
                 data-testid={`mood-day-${dateStr}`}
@@ -121,7 +143,24 @@ export default function MoodCalendar({ moods, habitPasses, initialYear, initialM
           <button className={view === '3month' ? 'active' : ''} onClick={() => setView('3month')}>3M</button>
           <button className={view === 'year' ? 'active' : ''} onClick={() => setView('year')}>Year</button>
         </div>
+        {habits && habits.length > 0 && (
+          <button
+            className={`mood-legend-toggle${showLegend ? ' active' : ''}`}
+            onClick={() => setShowLegend(s => !s)}
+          >
+            Legend
+          </button>
+        )}
       </div>
+      {showLegend && habits && habits.length > 0 && (
+        <div className="mood-legend">
+          {habits.map(h => (
+            <span key={h.id} className="mood-legend-item">
+              <span>{h.emoji}</span>{h.name}
+            </span>
+          ))}
+        </div>
+      )}
       {view === '3month' ? (
         <div className="mood-calendar-months">
           {threeMonths.map(({ year: y, month: m }) => renderMonth(y, m, false))}
