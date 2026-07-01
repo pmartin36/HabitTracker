@@ -864,6 +864,15 @@ a.full-calendar-link {
   overflow: visible;
 }
 
+.mood-dow-label {
+  font-size: 8px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  padding-bottom: 2px;
+}
+
 .mood-day {
   position: relative;
   display: flex;

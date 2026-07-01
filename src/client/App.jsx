@@ -33,8 +33,15 @@ export default function App() {
   };
 
   const fetchMoods = async () => {
-    const data = await fetch(`/api/mood?month=${currentMonth}`).then(r => r.json());
-    setMoods(data);
+    const [y, m] = currentMonth.split('-').map(Number);
+    const prevYear = m === 1 ? y - 1 : y;
+    const prevMonth = m === 1 ? 12 : m - 1;
+    const prevMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
+    const [curr, prev] = await Promise.all([
+      fetch(`/api/mood?month=${currentMonth}`).then(r => r.json()),
+      fetch(`/api/mood?month=${prevMonthStr}`).then(r => r.json()),
+    ]);
+    setMoods([...prev, ...curr]);
   };
 
   const fetchStreaks = async () => {

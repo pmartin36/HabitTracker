@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { MONTH_NAMES, daysInMonth, formatDate } from '../utils/date.js';
 
+const DOW_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
 const MOOD_LABELS = ['', 'Very Good', 'Good', 'Neutral', 'Not Great', 'Bad'];
 const MOOD_ICONS  = ['', '😄', '🙂', '😐', '🙁', '😣'];
 
@@ -82,12 +84,19 @@ export default function MoodCalendar({ moods, habitPasses, habits, initialYear, 
     const isFuture = applyFutureFilter &&
       (y > currentYear || (y === currentYear && m > currentMonthNum));
     const days = buildMoodDays(y, m);
+    const firstDOW = new Date(y, m - 1, 1).getDay();
     return (
       <div key={`${y}-${m}`} className="mood-calendar-month">
         <div className="mood-calendar-month-heading">
           {MONTH_NAMES[m - 1]} {y}
         </div>
         <div className="calendar-grid">
+          {DOW_LABELS.map((label, i) => (
+            <div key={`dow-${i}`} className="mood-dow-label">{label}</div>
+          ))}
+          {Array.from({ length: firstDOW }, (_, i) => (
+            <div key={`blank-${i}`} />
+          ))}
           {days.map(dateStr => {
             const day = parseInt(dateStr.split('-')[2], 10);
             if (isFuture) {
