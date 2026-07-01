@@ -20,14 +20,14 @@ function buildMoodDays(year, month) {
   return days;
 }
 
-function MoodDayCell({ day, dateStr, entry, passes, ...rest }) {
+function MoodDayCell({ day, dateStr, entry, passes, className, ...rest }) {
   const [hovered, setHovered] = useState(false);
   const topRow = passes.slice(0, 3);
   const bottomRow = passes.slice(3, 5);
   const hasTooltip = entry || passes.length > 0;
   return (
     <div
-      className={`mood-day mood-${entry?.rating ?? 'none'}`}
+      className={`mood-day mood-${entry?.rating ?? 'none'}${className ? ` ${className}` : ''}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       {...rest}
@@ -85,6 +85,11 @@ export default function MoodCalendar({ moods, habitPasses, habits, initialYear, 
       (y > currentYear || (y === currentYear && m > currentMonthNum));
     const days = buildMoodDays(y, m);
     const firstDOW = new Date(y, m - 1, 1).getDay();
+    const { year: prevY, month: prevM } = offsetMonth(y, m, -1);
+    const prevTotal = daysInMonth(prevY, prevM);
+    const overflowDays = Array.from({ length: firstDOW }, (_, i) =>
+      formatDate(prevY, prevM, prevTotal - firstDOW + 1 + i)
+    );
     return (
       <div key={`${y}-${m}`} className="mood-calendar-month">
         <div className="mood-calendar-month-heading">
@@ -94,9 +99,23 @@ export default function MoodCalendar({ moods, habitPasses, habits, initialYear, 
           {DOW_LABELS.map((label, i) => (
             <div key={`dow-${i}`} className="mood-dow-label">{label}</div>
           ))}
-          {Array.from({ length: firstDOW }, (_, i) => (
-            <div key={`blank-${i}`} />
-          ))}
+          {overflowDays.map(dateStr => {
+            const day = parseInt(dateStr.split('-')[2], 10);
+            const rating = moodMap[dateStr];
+            const entry = rating != null ? { rating } : undefined;
+            const passes = (habitPasses || []).filter(p => p.date === dateStr);
+            return (
+              <MoodDayCell
+                key={dateStr}
+                day={day}
+                dateStr={dateStr}
+                entry={entry}
+                passes={passes}
+                className="mood-day-overflow"
+                data-testid={`mood-day-${dateStr}`}
+              />
+            );
+          })}
           {days.map(dateStr => {
             const day = parseInt(dateStr.split('-')[2], 10);
             if (isFuture) {

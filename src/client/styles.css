@@ -585,6 +585,11 @@ input {
   background: var(--border);
 }
 
+.full-calendar-grid .day.overflow-day {
+  opacity: 0.25;
+  cursor: default;
+}
+
 .day.locked-day {
   cursor: default;
 }
@@ -871,6 +876,10 @@ a.full-calendar-link {
   color: var(--text-tertiary);
   text-transform: uppercase;
   padding-bottom: 2px;
+}
+
+.mood-day.mood-day-overflow {
+  opacity: 0.35;
 }
 
 .mood-day {
