@@ -26,7 +26,7 @@ export default function MiniCalendar({ habitId, entries, onStatusChange, year, m
       {days.map(({ day, dateStr, status, overflow }) => {
         if (overflow) {
           return (
-            <div key={`overflow-${dateStr}`} className={`day status-${status} locked-day`}>
+            <div key={`overflow-${dateStr}`} className={`day status-${status} locked-day overflow-day`}>
               {day}
             </div>
           );
