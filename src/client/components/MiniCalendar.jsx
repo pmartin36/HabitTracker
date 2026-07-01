@@ -23,7 +23,10 @@ export default function MiniCalendar({ habitId, entries, onStatusChange, year, m
 
   return (
     <div className="mini-calendar">
-      {days.map(({ day, dateStr, status }) => {
+      {days.map(({ day, dateStr, status, overflow }) => {
+        if (overflow) {
+          return <div key={`overflow-${dateStr}`} className="day overflow-day">{day}</div>;
+        }
         const isEditable = dateStr === todayStr || dateStr === yesterdayStr;
         const isFuture = dateStr > todayStr;
         return (

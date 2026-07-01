@@ -520,6 +520,11 @@ input {
   opacity: 0.8;
 }
 
+.mini-calendar .day.overflow-day {
+  opacity: 0.25;
+  cursor: default;
+}
+
 /* ===== Full calendar (scrollable multi-month history) ===== */
 .full-calendar {
   display: grid;
