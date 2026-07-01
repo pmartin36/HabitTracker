@@ -84,38 +84,12 @@ export default function MoodCalendar({ moods, habitPasses, habits, initialYear, 
     const isFuture = applyFutureFilter &&
       (y > currentYear || (y === currentYear && m > currentMonthNum));
     const days = buildMoodDays(y, m);
-    const firstDOW = new Date(y, m - 1, 1).getDay();
-    const { year: prevY, month: prevM } = offsetMonth(y, m, -1);
-    const prevTotal = daysInMonth(prevY, prevM);
-    const overflowDays = Array.from({ length: firstDOW }, (_, i) =>
-      formatDate(prevY, prevM, prevTotal - firstDOW + 1 + i)
-    );
     return (
       <div key={`${y}-${m}`} className="mood-calendar-month">
         <div className="mood-calendar-month-heading">
           {MONTH_NAMES[m - 1]} {y}
         </div>
         <div className="calendar-grid">
-          {DOW_LABELS.map((label, i) => (
-            <div key={`dow-${i}`} className="mood-dow-label">{label}</div>
-          ))}
-          {overflowDays.map(dateStr => {
-            const day = parseInt(dateStr.split('-')[2], 10);
-            const rating = moodMap[dateStr];
-            const entry = rating != null ? { rating } : undefined;
-            const passes = (habitPasses || []).filter(p => p.date === dateStr);
-            return (
-              <MoodDayCell
-                key={dateStr}
-                day={day}
-                dateStr={dateStr}
-                entry={entry}
-                passes={passes}
-                className="mood-day-overflow"
-                data-testid={`mood-day-${dateStr}`}
-              />
-            );
-          })}
           {days.map(dateStr => {
             const day = parseInt(dateStr.split('-')[2], 10);
             if (isFuture) {

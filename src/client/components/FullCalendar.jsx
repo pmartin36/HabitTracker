@@ -37,18 +37,7 @@ export default function FullCalendar({ entries, onStatusChange, initialYear, ini
     <div className="full-calendar">
       {months.map(({ year, month }) => {
         const total = daysInMonth(year, month);
-        const firstDOW = new Date(year, month - 1, 1).getDay(); // 0 = Sunday
-
-        const prevMonthNum = month === 1 ? 12 : month - 1;
-        const prevMonthYear = month === 1 ? year - 1 : year;
-        const prevMonthTotal = daysInMonth(prevMonthYear, prevMonthNum);
-
         const cells = [];
-        for (let i = 0; i < firstDOW; i++) {
-          const d = prevMonthTotal - firstDOW + 1 + i;
-          const dateStr = formatDate(prevMonthYear, prevMonthNum, d);
-          cells.push({ key: `overflow-${dateStr}`, overflow: true, day: d, dateStr });
-        }
         for (let d = 1; d <= total; d++) {
           const dateStr = formatDate(year, month, d);
           cells.push({
@@ -65,18 +54,8 @@ export default function FullCalendar({ entries, onStatusChange, initialYear, ini
             <div className="full-calendar-month-heading">
               {MONTH_NAMES[month - 1]} {year}
             </div>
-            <div className="full-calendar-dow">
-              {DOW_LABELS.map(d => <span key={d}>{d}</span>)}
-            </div>
             <div className="full-calendar-grid">
               {cells.map(cell => {
-                if (cell.overflow) {
-                  return (
-                    <div key={cell.key} className="day overflow-day">
-                      {cell.day}
-                    </div>
-                  );
-                }
                 const isEditable = cell.dateStr === todayStr || cell.dateStr === yesterdayStr;
                 const isFuture = cell.dateStr > todayStr;
                 return (
