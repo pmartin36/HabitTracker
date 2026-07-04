@@ -5,7 +5,10 @@ import MoodStrip from './components/MoodStrip.jsx';
 import MoodCalendar from './components/MoodCalendar.jsx';
 import AddHabitModal from './components/AddHabitModal.jsx';
 import CheckInModal from './components/CheckInModal.jsx';
+import Fireworks from './components/Fireworks.jsx';
 import { todayString } from './utils/date.js';
+
+const FIREWORKS_SHOWN_KEY = 'habittracker:fireworksShownDate';
 
 export default function App() {
   const [habits, setHabits] = useState([]);
@@ -16,6 +19,7 @@ export default function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showCheckinModal, setShowCheckinModal] = useState(() => window.location.pathname.endsWith('/checkin'));
   const [isDesktop] = useState(() => window.innerWidth >= 768);
+  const [fireworksTrigger, setFireworksTrigger] = useState(0);
 
   const today = todayString();
   const currentMonth = today.slice(0, 7);
@@ -36,7 +40,9 @@ export default function App() {
       fetch(`/api/entries?month=${currentMonth}`).then(r => r.json()),
       fetch(`/api/entries?month=${prevMonthStr}`).then(r => r.json()),
     ]);
-    setEntries([...prev, ...curr]);
+    const merged = [...prev, ...curr];
+    setEntries(merged);
+    return merged;
   };
 
   const fetchMoods = async () => {
@@ -82,8 +88,22 @@ export default function App() {
         body: JSON.stringify({ habit_id: habitId, date, status }),
       });
     }
-    await fetchEntries();
+    const freshEntries = await fetchEntries();
     await fetchStreaks();
+    maybeCelebrate(freshEntries, date, status);
+  };
+
+  // Fireworks fire once per day, the first time every active habit is marked
+  // "pass" for today — not on skip/fail, and not again after they've already shown.
+  const maybeCelebrate = (freshEntries, date, status) => {
+    if (status !== 'pass' || date !== today || habits.length === 0) return;
+    const allPassedToday = habits.every(h =>
+      freshEntries.some(e => e.habit_id === h.id && e.date === today && e.status === 'pass')
+    );
+    if (!allPassedToday) return;
+    if (window.localStorage.getItem(FIREWORKS_SHOWN_KEY) === today) return;
+    window.localStorage.setItem(FIREWORKS_SHOWN_KEY, today);
+    setFireworksTrigger(t => t + 1);
   };
 
   const handleMoodChange = async (rating) => {
@@ -160,70 +180,73 @@ export default function App() {
     });
 
   return (
-    <div className="app">
-      <div className="mood-strip-container">
-        <MoodStrip
-          currentRating={todayMood?.rating}
-          isEditable={!todayMood?.locked}
-          onRatingChange={handleMoodChange}
-          showCalendarButton={true}
-          showingCalendar={showMoodCalendar}
-          onToggleCalendar={() => setShowMoodCalendar((v) => !v)}
-          recentMoods={recentMoods}
-        />
-      </div>
-      {showMoodCalendar && (
-        <div className="mood-calendar-panel">
-          <MoodCalendar
-            moods={moods}
-            habitPasses={habitPasses}
-            habits={habits}
-            initialYear={currentYear}
-            initialMonth={currentMonthNum}
+    <>
+      <Fireworks trigger={fireworksTrigger} />
+      <div className="app">
+        <div className="mood-strip-container">
+          <MoodStrip
+            currentRating={todayMood?.rating}
+            isEditable={!todayMood?.locked}
+            onRatingChange={handleMoodChange}
+            showCalendarButton={true}
+            showingCalendar={showMoodCalendar}
+            onToggleCalendar={() => setShowMoodCalendar((v) => !v)}
+            recentMoods={recentMoods}
           />
         </div>
-      )}
-      {isDesktop ? (
-        <HabitBoard
-          habits={habits}
-          entries={entries}
-          onStatusChange={handleStatusChange}
-          onAddHabit={onAddHabit}
-          streaks={streaks}
-          onEditHabit={handleEditHabit}
-          onDeleteHabit={handleDeleteHabit}
-          onReorderHabits={handleReorderHabits}
-          currentYear={currentYear}
-          currentMonth={currentMonthNum}
-        />
-      ) : (
-        <MobileHabitView
-          habits={habits}
-          entries={entries}
-          onStatusChange={handleStatusChange}
-          onAddHabit={onAddHabit}
-          streaks={streaks}
-          onEditHabit={handleEditHabit}
-          onDeleteHabit={handleDeleteHabit}
-          currentYear={currentYear}
-          currentMonth={currentMonthNum}
-        />
-      )}
-      {showAddModal && (
-        <AddHabitModal
-          onSubmit={handleAddHabitSubmit}
-          onReinstate={handleReinstateHabit}
-          onClose={() => setShowAddModal(false)}
-        />
-      )}
-      {showCheckinModal && (
-        <CheckInModal
-          onClose={() => {
-            setShowCheckinModal(false);
-            window.history.replaceState({}, '', '/');
-          }}
-        />
-      )}
-    </div>
+        {showMoodCalendar && (
+          <div className="mood-calendar-panel">
+            <MoodCalendar
+              moods={moods}
+              habitPasses={habitPasses}
+              habits={habits}
+              initialYear={currentYear}
+              initialMonth={currentMonthNum}
+            />
+          </div>
+        )}
+        {isDesktop ? (
+          <HabitBoard
+            habits={habits}
+            entries={entries}
+            onStatusChange={handleStatusChange}
+            onAddHabit={onAddHabit}
+            streaks={streaks}
+            onEditHabit={handleEditHabit}
+            onDeleteHabit={handleDeleteHabit}
+            onReorderHabits={handleReorderHabits}
+            currentYear={currentYear}
+            currentMonth={currentMonthNum}
+          />
+        ) : (
+          <MobileHabitView
+            habits={habits}
+            entries={entries}
+            onStatusChange={handleStatusChange}
+            onAddHabit={onAddHabit}
+            streaks={streaks}
+            onEditHabit={handleEditHabit}
+            onDeleteHabit={handleDeleteHabit}
+            currentYear={currentYear}
+            currentMonth={currentMonthNum}
+          />
+        )}
+        {showAddModal && (
+          <AddHabitModal
+            onSubmit={handleAddHabitSubmit}
+            onReinstate={handleReinstateHabit}
+            onClose={() => setShowAddModal(false)}
+          />
+        )}
+        {showCheckinModal && (
+          <CheckInModal
+            onClose={() => {
+              setShowCheckinModal(false);
+              window.history.replaceState({}, '', '/');
+            }}
+          />
+        )}
+      </div>
+    </>
   );
 }

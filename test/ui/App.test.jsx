@@ -11,7 +11,7 @@ const SAMPLE_HABITS = [
 ];
 
 // ── Component mocks ──────────────────────────────────────────────────────────
-// HabitBoard mock renders a card per habit, with a Done! button and a
+// HabitBoard mock renders a card per habit, with Done!/Skip/Fail buttons and a
 // mini-calendar placeholder so App-level orchestration can be tested.
 vi.mock('../../src/client/components/HabitBoard.jsx', () => ({
   default: ({ habits = [], onStatusChange }) => (
@@ -20,7 +20,9 @@ vi.mock('../../src/client/components/HabitBoard.jsx', () => ({
         <div key={h.id} data-testid={`habit-card-${h.id}`}>
           <span>{h.name}</span>
           <div data-testid={`mini-calendar-${h.id}`} />
-          <button onClick={() => onStatusChange(h.id, today, 'pass')}>Done!</button>
+          <button data-testid={`done-${h.id}`} onClick={() => onStatusChange(h.id, today, 'pass')}>Done!</button>
+          <button data-testid={`skip-${h.id}`} onClick={() => onStatusChange(h.id, today, 'skip')}>Skip</button>
+          <button data-testid={`fail-${h.id}`} onClick={() => onStatusChange(h.id, today, 'fail')}>Fail</button>
         </div>
       ))}
     </div>
@@ -84,6 +86,37 @@ function makeFetchMock({ habits = SAMPLE_HABITS, entries = [], mood = [] } = {})
   });
 }
 
+// Unlike makeFetchMock, this tracks entries statefully across POST/DELETE/GET
+// calls — needed to test fireworks-trigger logic, which reads back the fresh
+// entries returned after a status change.
+function makeStatefulFetchMock({ habits = SAMPLE_HABITS } = {}) {
+  let entries = [];
+  return vi.fn((url, options = {}) => {
+    const method = options.method ?? 'GET';
+    if (url.includes('/api/entries')) {
+      if (method === 'POST') {
+        const body = JSON.parse(options.body);
+        entries = entries.filter((e) => !(e.habit_id === body.habit_id && e.date === body.date));
+        entries.push({ habit_id: body.habit_id, date: body.date, status: body.status });
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }
+      if (method === 'DELETE') {
+        const body = JSON.parse(options.body);
+        entries = entries.filter((e) => !(e.habit_id === body.habit_id && e.date === body.date));
+        return Promise.resolve({ ok: true, json: async () => ({ deleted: true }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => entries });
+    }
+    if (url.includes('/api/habits')) {
+      return Promise.resolve({ ok: true, json: async () => habits });
+    }
+    if (url.includes('/api/mood')) {
+      return Promise.resolve({ ok: true, json: async () => [] });
+    }
+    return Promise.resolve({ ok: true, json: async () => ({}) });
+  });
+}
+
 // ── Test suite ───────────────────────────────────────────────────────────────
 describe('App', () => {
   beforeEach(() => {
@@ -94,6 +127,7 @@ describe('App', () => {
       value: 1024,
     });
     global.fetch = makeFetchMock();
+    window.localStorage.clear();
   });
 
   afterEach(() => {
@@ -276,5 +310,105 @@ describe('App', () => {
     await waitFor(() => {
       expect(screen.getByTestId('mini-calendar-1')).toBeInTheDocument();
     });
+  });
+
+  // ── Fireworks trigger (once per day, only when every habit is marked pass) ──
+
+  const FIREWORKS_KEY = 'habittracker:fireworksShownDate';
+  const TWO_HABITS = [
+    { id: 1, name: 'Exercise', emoji: '🏃', sort_order: 1 },
+    { id: 2, name: 'Read', emoji: '📖', sort_order: 2 },
+  ];
+
+  it('does not set the fireworks flag until every habit is marked pass', async () => {
+    const user = userEvent.setup();
+    global.fetch = makeStatefulFetchMock({ habits: TWO_HABITS });
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByTestId('done-1')).toBeInTheDocument());
+    await user.click(screen.getByTestId('done-1'));
+
+    await waitFor(() => {
+      const postCalls = global.fetch.mock.calls.filter(
+        ([url, opts]) => url.includes('/api/entries') && opts?.method === 'POST'
+      );
+      expect(postCalls.length).toBeGreaterThan(0);
+    });
+
+    expect(window.localStorage.getItem(FIREWORKS_KEY)).toBeNull();
+  });
+
+  it('sets the fireworks flag once every habit is marked pass', async () => {
+    const user = userEvent.setup();
+    global.fetch = makeStatefulFetchMock({ habits: TWO_HABITS });
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByTestId('done-1')).toBeInTheDocument());
+    await user.click(screen.getByTestId('done-1'));
+    await user.click(screen.getByTestId('done-2'));
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(FIREWORKS_KEY)).toBe(today);
+    });
+  });
+
+  it('does not set the fireworks flag when the last habit is marked skip instead of pass', async () => {
+    const user = userEvent.setup();
+    global.fetch = makeStatefulFetchMock({ habits: TWO_HABITS });
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByTestId('done-1')).toBeInTheDocument());
+    await user.click(screen.getByTestId('done-1'));
+    await user.click(screen.getByTestId('skip-2'));
+
+    await waitFor(() => {
+      const postCalls = global.fetch.mock.calls.filter(
+        ([url, opts]) => url.includes('/api/entries') && opts?.method === 'POST'
+      );
+      expect(postCalls.length).toBeGreaterThanOrEqual(2);
+    });
+
+    expect(window.localStorage.getItem(FIREWORKS_KEY)).toBeNull();
+  });
+
+  it('only sets the fireworks flag once per day, even if Done! is clicked again', async () => {
+    const user = userEvent.setup();
+    global.fetch = makeStatefulFetchMock({ habits: SAMPLE_HABITS });
+
+    // jsdom's localStorage is a host Proxy — assigning over its methods (as
+    // vi.spyOn does) is silently absorbed rather than intercepted, so we swap
+    // the whole window.localStorage object for a plain spy-able stub instead.
+    const store = {};
+    const setItemSpy = vi.fn((k, v) => { store[k] = v; });
+    const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: {
+        setItem: setItemSpy,
+        getItem: (k) => (k in store ? store[k] : null),
+        removeItem: (k) => { delete store[k]; },
+        clear: () => { for (const k in store) delete store[k]; },
+      },
+    });
+
+    try {
+      render(<App />);
+      await waitFor(() => expect(screen.getByTestId('done-1')).toBeInTheDocument());
+
+      await user.click(screen.getByTestId('done-1'));
+      await waitFor(() => expect(window.localStorage.getItem(FIREWORKS_KEY)).toBe(today));
+      expect(setItemSpy.mock.calls.filter(([k]) => k === FIREWORKS_KEY)).toHaveLength(1);
+
+      await user.click(screen.getByTestId('done-1'));
+      await waitFor(() => {
+        const postCalls = global.fetch.mock.calls.filter(
+          ([url, opts]) => url.includes('/api/entries') && opts?.method === 'POST'
+        );
+        expect(postCalls.length).toBeGreaterThanOrEqual(2);
+      });
+      expect(setItemSpy.mock.calls.filter(([k]) => k === FIREWORKS_KEY)).toHaveLength(1);
+    } finally {
+      Object.defineProperty(window, 'localStorage', originalDescriptor);
+    }
   });
 });
