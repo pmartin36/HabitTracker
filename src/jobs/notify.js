@@ -12,7 +12,7 @@ function capitalize(s) {
 }
 
 export async function buildNotificationMessage(db, asOfDate) {
-  const habits = db.prepare('SELECT * FROM habits ORDER BY sort_order').all();
+  const habits = db.prepare('SELECT * FROM habits WHERE archived_at IS NULL ORDER BY sort_order').all();
 
   if (habits.length === 0) {
     return 'No habits configured.';
@@ -37,7 +37,7 @@ export async function buildNotificationMessage(db, asOfDate) {
 }
 
 export async function buildGraceWarningMessage(db, asOfDate) {
-  const habits = db.prepare('SELECT * FROM habits ORDER BY sort_order').all();
+  const habits = db.prepare('SELECT * FROM habits WHERE archived_at IS NULL ORDER BY sort_order').all();
 
   if (habits.length === 0) {
     return null;
@@ -67,7 +67,7 @@ export async function buildGraceWarningMessage(db, asOfDate) {
 }
 
 export async function buildEveningMessage(db, asOfDate) {
-  const habits = db.prepare('SELECT * FROM habits ORDER BY sort_order').all();
+  const habits = db.prepare('SELECT * FROM habits WHERE archived_at IS NULL ORDER BY sort_order').all();
 
   if (habits.length === 0) {
     return 'No habits configured.';
@@ -90,7 +90,7 @@ export async function buildEveningMessage(db, asOfDate) {
   }
 
   lines.push('');
-  lines.push(`${process.env.APP_URL ?? 'http://localhost:3000'}/habittracker/checkin`);
+  lines.push(`${process.env.APP_URL ?? 'http://localhost:3000'}`);
 
   return lines.join('\n');
 }
