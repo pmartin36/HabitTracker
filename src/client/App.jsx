@@ -62,16 +62,28 @@ export default function App() {
     setStreaks(data);
   };
 
+  const refetchAll = async () => {
+    await Promise.all([
+      fetchHabits(),
+      fetchMoods(),
+      fetchEntries(),
+      fetchStreaks(),
+    ]);
+  };
+
   useEffect(() => {
-    const init = async () => {
-      await Promise.all([
-        fetchHabits(),
-        fetchMoods(),
-        fetchEntries(),
-        fetchStreaks(),
-      ]);
+    refetchAll();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-pull everything when the tab regains focus — data can go stale (e.g.
+  // the day rolling over, or check-ins made from another device) while it's
+  // in the background.
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (!document.hidden) refetchAll();
     };
-    init();
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleStatusChange = async (habitId, date, status) => {

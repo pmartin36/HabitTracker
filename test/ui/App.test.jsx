@@ -175,6 +175,72 @@ describe('App', () => {
     });
   });
 
+  // ── Re-fetch on tab focus ────────────────────────────────────────────────
+
+  it('re-fetches habits/entries/mood/streaks when the tab becomes visible again', async () => {
+    render(<App />);
+    await waitFor(() => {
+      expect(global.fetch.mock.calls.some(([url]) => url.includes('/api/habits'))).toBe(true);
+    });
+
+    const countBefore = global.fetch.mock.calls.length;
+
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    Object.defineProperty(document, 'hidden', { configurable: true, value: false });
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    await waitFor(() => {
+      expect(global.fetch.mock.calls.length).toBeGreaterThan(countBefore);
+    });
+  });
+
+  it('renders newly-fetched data after the tab becomes visible again (not just fetches it)', async () => {
+    // A mock whose /api/habits response can change between calls, so we can
+    // prove the DOM actually reflects the second response — not just that a
+    // second fetch happened.
+    let habitsData = SAMPLE_HABITS;
+    global.fetch = vi.fn((url, options = {}) => {
+      const method = options.method ?? 'GET';
+      if (method !== 'GET') return Promise.resolve({ ok: true, json: async () => ({}) });
+      if (url.includes('/api/habits')) return Promise.resolve({ ok: true, json: async () => habitsData });
+      if (url.includes('/api/entries')) return Promise.resolve({ ok: true, json: async () => [] });
+      if (url.includes('/api/mood')) return Promise.resolve({ ok: true, json: async () => [] });
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    render(<App />);
+    await waitFor(() => expect(screen.getByText('Exercise')).toBeInTheDocument());
+    expect(screen.queryByText('Meditate')).not.toBeInTheDocument();
+
+    // Simulate a habit added from another device/tab while this one was backgrounded.
+    habitsData = [...SAMPLE_HABITS, { id: 99, name: 'Meditate', emoji: '🧘', sort_order: 2 }];
+
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+    Object.defineProperty(document, 'hidden', { configurable: true, value: false });
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    await waitFor(() => expect(screen.getByText('Meditate')).toBeInTheDocument());
+  });
+
+  it('does not re-fetch just because the tab becomes hidden', async () => {
+    render(<App />);
+    await waitFor(() => {
+      expect(global.fetch.mock.calls.some(([url]) => url.includes('/api/habits'))).toBe(true);
+    });
+
+    const countBefore = global.fetch.mock.calls.length;
+
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    // Give any (incorrect) fetch a moment to fire before asserting it didn't.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(global.fetch.mock.calls.length).toBe(countBefore);
+  });
+
   // ── Desktop / mobile layout ──────────────────────────────────────────────
 
   it('renders HabitBoard when window.innerWidth >= 768', async () => {
