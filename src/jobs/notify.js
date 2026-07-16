@@ -11,7 +11,26 @@ function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+// A day is fully logged when every active habit has a non-pending entry and
+// the day's mood has been marked. There must be at least one habit.
+export function isDayFullyLogged(db, date) {
+  const habits = db.prepare('SELECT id FROM habits WHERE archived_at IS NULL').all();
+  if (habits.length === 0) return false;
+
+  const getEntry = db.prepare('SELECT status FROM entries WHERE habit_id = ? AND date = ?');
+  const allResolved = habits.every(habit => {
+    const entry = getEntry.get(habit.id, date);
+    return entry != null && entry.status !== 'pending';
+  });
+  if (!allResolved) return false;
+
+  const mood = db.prepare('SELECT 1 FROM daily_mood WHERE date = ?').get(date);
+  return mood != null;
+}
+
 export async function buildNotificationMessage(db, asOfDate) {
+  if (isDayFullyLogged(db, asOfDate)) return null;
+
   const habits = db.prepare('SELECT * FROM habits WHERE archived_at IS NULL ORDER BY sort_order').all();
 
   if (habits.length === 0) {
@@ -67,6 +86,8 @@ export async function buildGraceWarningMessage(db, asOfDate) {
 }
 
 export async function buildEveningMessage(db, asOfDate) {
+  if (isDayFullyLogged(db, asOfDate)) return null;
+
   const habits = db.prepare('SELECT * FROM habits WHERE archived_at IS NULL ORDER BY sort_order').all();
 
   if (habits.length === 0) {

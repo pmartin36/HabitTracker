@@ -127,6 +127,54 @@ describe("buildNotificationMessage", () => {
     const msg = await buildNotificationMessage(emptyDb, AS_OF_DATE);
     expect(msg).toContain("No habits configured.");
   });
+
+  it("excludes archived habits", async () => {
+    db.prepare(
+      "INSERT INTO habits (name, emoji, sort_order, created_at) VALUES (?, ?, ?, ?)"
+    ).run("Old habit", "💤", 3, "2020-01-01");
+    db.prepare(
+      "UPDATE habits SET archived_at = datetime('now') WHERE name = 'Old habit'"
+    ).run();
+
+    const msg = await buildNotificationMessage(db, AS_OF_DATE);
+    expect(msg).not.toContain("Old habit");
+  });
+
+  it("returns null when all habits are resolved and mood is marked", async () => {
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId1, AS_OF_DATE, "pass", 1);
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId2, AS_OF_DATE, "skip", 1);
+    db.prepare("INSERT INTO daily_mood (date, rating) VALUES (?, ?)").run(AS_OF_DATE, 4);
+
+    const msg = await buildNotificationMessage(db, AS_OF_DATE);
+    expect(msg).toBeNull();
+  });
+
+  it("still sends when all habits are resolved but mood is not marked", async () => {
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId1, AS_OF_DATE, "pass", 1);
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId2, AS_OF_DATE, "pass", 1);
+
+    const msg = await buildNotificationMessage(db, AS_OF_DATE);
+    expect(msg).not.toBeNull();
+  });
+
+  it("still sends when mood is marked but a habit is still pending", async () => {
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId1, AS_OF_DATE, "pass", 1);
+    // habitId2 has no entry — pending
+    db.prepare("INSERT INTO daily_mood (date, rating) VALUES (?, ?)").run(AS_OF_DATE, 4);
+
+    const msg = await buildNotificationMessage(db, AS_OF_DATE);
+    expect(msg).not.toBeNull();
+  });
 });
 
 describe("buildGraceWarningMessage", () => {
@@ -198,6 +246,18 @@ describe("buildGraceWarningMessage", () => {
     process.env.APP_URL = "http://test-host:9999";
     const msg = await buildGraceWarningMessage(db, AS_OF_DATE);
     expect(msg).toContain("http://test-host:9999");
+  });
+
+  it("excludes archived habits even when pending", async () => {
+    db.prepare(
+      "INSERT INTO habits (name, emoji, sort_order, created_at) VALUES (?, ?, ?, ?)"
+    ).run("Old habit", "💤", 3, "2020-01-01");
+    db.prepare(
+      "UPDATE habits SET archived_at = datetime('now') WHERE name = 'Old habit'"
+    ).run();
+
+    const msg = await buildGraceWarningMessage(db, AS_OF_DATE);
+    expect(msg).not.toContain("Old habit");
   });
 });
 
@@ -283,6 +343,54 @@ describe("buildEveningMessage", () => {
     process.env.APP_URL = "http://test-host:9999";
     const msg = await buildEveningMessage(db, AS_OF_DATE);
     expect(msg).toContain("http://test-host:9999");
+  });
+
+  it("excludes archived habits", async () => {
+    db.prepare(
+      "INSERT INTO habits (name, emoji, sort_order, created_at) VALUES (?, ?, ?, ?)"
+    ).run("Old habit", "💤", 3, "2020-01-01");
+    db.prepare(
+      "UPDATE habits SET archived_at = datetime('now') WHERE name = 'Old habit'"
+    ).run();
+
+    const msg = await buildEveningMessage(db, AS_OF_DATE);
+    expect(msg).not.toContain("Old habit");
+  });
+
+  it("returns null when all habits are resolved and mood is marked", async () => {
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId1, AS_OF_DATE, "pass", 1);
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId2, AS_OF_DATE, "fail", 1);
+    db.prepare("INSERT INTO daily_mood (date, rating) VALUES (?, ?)").run(AS_OF_DATE, 3);
+
+    const msg = await buildEveningMessage(db, AS_OF_DATE);
+    expect(msg).toBeNull();
+  });
+
+  it("still sends when all habits are resolved but mood is not marked", async () => {
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId1, AS_OF_DATE, "pass", 1);
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId2, AS_OF_DATE, "skip", 1);
+
+    const msg = await buildEveningMessage(db, AS_OF_DATE);
+    expect(msg).not.toBeNull();
+  });
+
+  it("still sends when mood is marked but a habit is still pending", async () => {
+    db.prepare(
+      "INSERT INTO entries (habit_id, date, status, explicit) VALUES (?, ?, ?, ?)"
+    ).run(habitId1, AS_OF_DATE, "pass", 1);
+    // habitId2 has no entry — pending
+    db.prepare("INSERT INTO daily_mood (date, rating) VALUES (?, ?)").run(AS_OF_DATE, 3);
+
+    const msg = await buildEveningMessage(db, AS_OF_DATE);
+    expect(msg).not.toBeNull();
   });
 });
 
