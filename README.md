@@ -53,6 +53,8 @@ npx vite           # in a second terminal — Vite dev server on :5173
 | `DB_PATH` | `./habits.db` | Path to the SQLite database file |
 | `APP_URL` | `http://localhost:3000` | Base URL included in notifications |
 | `NTFY_URL` | *(unset)* | ntfy.sh topic URL, e.g. `https://ntfy.sh/your-private-topic`. If unset, notifications are skipped. |
+| `AUTH_PASSWORD` | *(unset)* | Shared password gating the whole app. If unset, auth is disabled (open access) — use this if you're relying on a private network like Tailscale instead. If set, logging in via `/login` sets a ~10-year cookie so you're never prompted again on that browser. Rotate this value to log everyone out. |
+| `COOKIE_SECURE` | `true` | Set to `false` if the app is served over plain HTTP (e.g. behind Tailscale with no TLS) — otherwise the browser will silently drop the login cookie and you'll be re-prompted every request. |
 
 `VITE_BASE_PATH` (build-time only) sets the app's URL prefix if serving under a subpath (e.g. `/habittracker/`). Defaults to `/habittracker/`. Create a `.env.local` file with `VITE_BASE_PATH=/` for local development.
 

@@ -1,5 +1,6 @@
 import express from 'express';
 import db from './db/index.js';
+import { authGate } from './auth.js';
 import habitsRouter from './routes/habits.js';
 import entriesRouter from './routes/entries.js';
 import moodRouter from './routes/mood.js';
@@ -16,6 +17,7 @@ export function createApp(injectedDb) {
   const database = injectedDb ?? db;
   const app = express();
 
+  app.use(authGate());
   app.use(express.json());
 
   app.get('/health', (_req, res) => {
